@@ -110,3 +110,116 @@ func TestBuild4D_EndToEnd_Example(t *testing.T) {
 		t.Fatalf("expected best B, got %s", best.ID)
 	}
 }
+
+func TestComputeNormStatsAndWithStats_Parity2D(t *testing.T) {
+	type rec struct{ a, b float64 }
+	items := []rec{{0, 10}, {5, 20}, {10, 30}}
+	weights := [2]float64{1, 2}
+	invert := [2]bool{false, true}
+	// Build using automatic stats
+	autoPts, err := Build2D(items,
+		func(r rec) string { return "" },
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+		weights, invert,
+	)
+	if err != nil {
+		t.Fatalf("auto build err: %v", err)
+	}
+	// Compute stats and build with stats
+	stats := ComputeNormStats2D(items,
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+	)
+	withPts, err := Build2DWithStats(items,
+		func(r rec) string { return "" },
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+		weights, invert, stats,
+	)
+	if err != nil {
+		t.Fatalf("with-stats build err: %v", err)
+	}
+	if len(withPts) != len(autoPts) {
+		t.Fatalf("len mismatch")
+	}
+	for i := range withPts {
+		if len(withPts[i].Coords) != 2 {
+			t.Fatalf("dim mismatch")
+		}
+		if withPts[i].Coords[0] != autoPts[i].Coords[0] || withPts[i].Coords[1] != autoPts[i].Coords[1] {
+			t.Fatalf("coords mismatch at %d: %v vs %v", i, withPts[i].Coords, autoPts[i].Coords)
+		}
+	}
+}
+
+func TestBuild3DWithStats_MinEqualsMax_Safe(t *testing.T) {
+	type rec struct{ x, y, z float64 }
+	items := []rec{{1, 2, 3}, {1, 5, 3}, {1, 9, 3}}
+	weights := [3]float64{1, 1, 1}
+	invert := [3]bool{false, false, false}
+	// x and z min==max across items for x=1, z=3
+	stats := NormStats{Stats: []AxisStats{{Min: 1, Max: 1}, {Min: 2, Max: 9}, {Min: 3, Max: 3}}}
+	pts, err := Build3DWithStats(items,
+		func(r rec) string { return "" },
+		func(r rec) float64 { return r.x },
+		func(r rec) float64 { return r.y },
+		func(r rec) float64 { return r.z },
+		weights, invert, stats,
+	)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	for _, p := range pts {
+		if p.Coords[0] != 0 || p.Coords[2] != 0 {
+			t.Fatalf("expected zero for min==max axes, got %v", p.Coords)
+		}
+	}
+}
+
+func TestBuild4DWithStats_DynamicUpdateExample(t *testing.T) {
+	type Peer struct {
+		ID                     string
+		Ping, Hops, Geo, Score float64
+	}
+	base := []Peer{{"A", 20, 3, 1000, 0.8}, {"B", 30, 2, 800, 0.9}}
+	weights := [4]float64{1, 1, 0.2, 1.2}
+	invert := [4]bool{false, false, false, true}
+	stats := ComputeNormStats4D(base,
+		func(p Peer) float64 { return p.Ping },
+		func(p Peer) float64 { return p.Hops },
+		func(p Peer) float64 { return p.Geo },
+		func(p Peer) float64 { return p.Score },
+	)
+	pts, err := Build4DWithStats(base,
+		func(p Peer) string { return p.ID },
+		func(p Peer) float64 { return p.Ping },
+		func(p Peer) float64 { return p.Hops },
+		func(p Peer) float64 { return p.Geo },
+		func(p Peer) float64 { return p.Score },
+		weights, invert, stats,
+	)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	tr, err := NewKDTree(pts)
+	if err != nil {
+		t.Fatalf("kdt err: %v", err)
+	}
+	// add a new peer using same stats
+	newPeer := Peer{"Z", 15, 2, 1200, 0.85}
+	newPts, _ := Build4DWithStats([]Peer{newPeer},
+		func(p Peer) string { return p.ID },
+		func(p Peer) float64 { return p.Ping },
+		func(p Peer) float64 { return p.Hops },
+		func(p Peer) float64 { return p.Geo },
+		func(p Peer) float64 { return p.Score },
+		weights, invert, stats,
+	)
+	if !tr.Insert(newPts[0]) {
+		t.Fatalf("insert failed")
+	}
+	if tr.Dim() != 4 {
+		t.Fatalf("dim != 4")
+	}
+}

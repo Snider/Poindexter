@@ -119,3 +119,47 @@ func ExampleBuild4D() {
 	fmt.Println(tr.Dim())
 	// Output: 4
 }
+
+func ExampleBuild2DWithStats() {
+	type rec struct{ ping, hops float64 }
+	items := []rec{{20, 3}, {30, 2}, {15, 4}}
+	weights := [2]float64{1.0, 1.0}
+	invert := [2]bool{false, false}
+	stats := poindexter.ComputeNormStats2D(items,
+		func(r rec) float64 { return r.ping },
+		func(r rec) float64 { return r.hops },
+	)
+	pts, _ := poindexter.Build2DWithStats(items,
+		func(r rec) string { return "" },
+		func(r rec) float64 { return r.ping },
+		func(r rec) float64 { return r.hops },
+		weights, invert, stats,
+	)
+	tr, _ := poindexter.NewKDTree(pts)
+	fmt.Printf("dim=%d len=%d", tr.Dim(), tr.Len())
+	// Output: dim=2 len=3
+}
+
+func ExampleBuild4DWithStats() {
+	type rec struct{ a, b, c, d float64 }
+	items := []rec{{0, 0, 0, 0}, {1, 1, 1, 1}}
+	weights := [4]float64{1, 1, 1, 1}
+	invert := [4]bool{false, false, false, false}
+	stats := poindexter.ComputeNormStats4D(items,
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+		func(r rec) float64 { return r.c },
+		func(r rec) float64 { return r.d },
+	)
+	pts, _ := poindexter.Build4DWithStats(items,
+		func(r rec) string { return "" },
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+		func(r rec) float64 { return r.c },
+		func(r rec) float64 { return r.d },
+		weights, invert, stats,
+	)
+	tr, _ := poindexter.NewKDTree(pts)
+	fmt.Println(tr.Dim())
+	// Output: 4
+}

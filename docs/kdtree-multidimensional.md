@@ -192,7 +192,26 @@ func main() {
 
 ## Dynamic updates
 
-Your routing table changes constantly. Insert/remove peers. For consistent normalization, rebuild points when the candidate set changes (or cache and reuse your min/max stats).
+Your routing table changes constantly. Insert/remove peers. For consistent normalization, compute and reuse your min/max stats (preferred) or rebuild points when the candidate set changes.
+
+Tip: Use the WithStats helpers to reuse normalization across updates:
+
+```go
+// Compute once over your baseline
+stats := poindexter.ComputeNormStats2D(peers,
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+)
+
+// Build now or later using the same stats
+ts, _ := poindexter.Build2DWithStats(
+    peers,
+    func(p Peer) string { return p.ID },
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+    [2]float64{1,1}, [2]bool{false,false}, stats,
+)
+```
 
 ```go
 package main

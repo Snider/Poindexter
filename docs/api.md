@@ -13,13 +13,13 @@ func Version() string
 Returns the current version of the library.
 
 **Returns:**
-- `string`: The version string (e.g., "0.2.0")
+- `string`: The version string (e.g., "0.2.1")
 
 **Example:**
 
 ```go
 version := poindexter.Version()
-fmt.Println(version) // Output: 0.2.0
+fmt.Println(version) // Output: 0.2.1
 ```
 
 ---
@@ -410,3 +410,85 @@ Construct an empty KDTree with the given dimension, then populate later via `Ins
 - Concurrency: KDTree is not safe for concurrent mutation. Wrap with a mutex or share immutable snapshots for read-mostly workloads.
 
 See runnable examples in the repository `examples/` and the docs pages for 1D DHT and multi-dimensional KDTree usage.
+
+
+## KDTree Normalization Stats (reuse across updates)
+
+To keep normalization consistent across dynamic updates, compute per‑axis min/max once and reuse it to build points later. This avoids drift when the candidate set changes.
+
+### Types
+
+```go
+// AxisStats holds the min/max observed for a single axis.
+type AxisStats struct {
+    Min float64
+    Max float64
+}
+
+// NormStats holds per‑axis normalisation stats; for D dims, Stats has length D.
+type NormStats struct {
+    Stats []AxisStats
+}
+```
+
+### Compute normalization stats
+
+```go
+func ComputeNormStats2D[T any](items []T, f1, f2 func(T) float64) NormStats
+func ComputeNormStats3D[T any](items []T, f1, f2, f3 func(T) float64) NormStats
+func ComputeNormStats4D[T any](items []T, f1, f2, f3, f4 func(T) float64) NormStats
+```
+
+### Build with precomputed stats
+
+```go
+func Build2DWithStats[T any](
+    items []T,
+    id func(T) string,
+    f1, f2 func(T) float64,
+    weights [2]float64,
+    invert [2]bool,
+    stats NormStats,
+) ([]KDPoint[T], error)
+
+func Build3DWithStats[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3 func(T) float64,
+    weights [3]float64,
+    invert [3]bool,
+    stats NormStats,
+) ([]KDPoint[T], error)
+
+func Build4DWithStats[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3, f4 func(T) float64,
+    weights [4]float64,
+    invert [4]bool,
+    stats NormStats,
+) ([]KDPoint[T], error)
+```
+
+#### Example (2D)
+```go
+// Compute stats once over your baseline set
+stats := poindexter.ComputeNormStats2D(peers,
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+)
+
+// Build points using those stats (now or later)
+pts, _ := poindexter.Build2DWithStats(
+    peers,
+    func(p Peer) string { return p.ID },
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+    [2]float64{1,1}, [2]bool{false,false}, stats,
+)
+```
+
+Notes:
+- If `min==max` for an axis, normalized value is `0` for that axis.
+- `invert[i]` flips the normalized axis as `1 - n` before applying `weights[i]`.
+- These helpers mirror `Build2D/3D/4D`, but use your provided `NormStats` instead of recomputing from the items slice.
