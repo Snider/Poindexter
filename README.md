@@ -87,6 +87,109 @@ Explore runnable examples in the repository:
 
 See the multi-dimensional KDTree docs for end-to-end examples and weighting/normalization helpers: [Multi-Dimensional KDTree (DHT)](docs/kdtree-multidimensional.md).
 
+## Maintainer Makefile
+
+The repository includes a maintainer-friendly `Makefile` that mirrors CI tasks and speeds up local workflows.
+
+- help — list available targets
+- tidy / tidy-check — run `go mod tidy`, optionally verify no diffs
+- fmt — format code (`go fmt ./...`)
+- vet — `go vet ./...`
+- build — `go build ./...`
+- examples — build all programs under `examples/` (if present)
+- test — run unit tests
+- race — run tests with the race detector
+- cover — run tests with race + coverage (writes `coverage.out` and prints summary)
+- coverhtml — render HTML coverage report to `coverage.html`
+- fuzz — run Go fuzzing for a configurable time (default 10s) matching CI
+- bench — run benchmarks with `-benchmem` (writes `bench.txt`)
+- lint — run `golangci-lint` (if installed)
+- vuln — run `govulncheck` (if installed)
+- ci — CI-parity aggregate: tidy-check, build, vet, cover, examples, bench, lint, vuln
+- release — run GoReleaser with the canonical `.goreleaser.yaml` (for tagged releases)
+- snapshot — GoReleaser snapshot (no publish)
+- docs-serve — serve MkDocs locally on 127.0.0.1:8000
+- docs-build — build MkDocs site into `site/`
+
+Quick usage:
+
+- See all targets:
+
+```bash
+make help
+```
+
+- Fast local cycle:
+
+```bash
+make fmt
+make vet
+make test
+```
+
+- CI-parity run (what GitHub Actions does, locally):
+
+```bash
+make ci
+```
+
+- Coverage summary:
+
+```bash
+make cover
+```
+
+- Generate HTML coverage report (writes coverage.html):
+
+```bash
+make coverhtml
+```
+
+- Fuzz for 10 seconds (default):
+
+```bash
+make fuzz
+```
+
+- Fuzz with a custom time (e.g., 30s):
+
+```bash
+make fuzz FUZZTIME=30s
+```
+
+- Run benchmarks (writes bench.txt):
+
+```bash
+make bench
+```
+
+- Build examples (if any under ./examples):
+
+```bash
+make examples
+```
+
+- Serve docs locally (requires mkdocs-material):
+
+```bash
+make docs-serve
+```
+
+Configurable variables:
+
+- `FUZZTIME` (default `10s`) — e.g. `make fuzz FUZZTIME=30s`
+- `BENCHOUT` (default `bench.txt`), `COVEROUT` (default `coverage.out`), `COVERHTML` (default `coverage.html`)
+- Tool commands are overridable via env: `GO`, `GOLANGCI_LINT`, `GORELEASER`, `MKDOCS`
+
+Requirements for optional targets:
+
+- `golangci-lint` for `make lint`
+- `golang.org/x/vuln/cmd/govulncheck` for `make vuln`
+- `goreleaser` for `make release` / `make snapshot`
+- `mkdocs` + `mkdocs-material` for `make docs-serve` / `make docs-build`
+
+See the full Makefile at the repo root for authoritative target definitions.
+
 ## License
 
 This project is licensed under the European Union Public Licence v1.2 (EUPL-1.2). See [LICENSE](LICENSE) for details.

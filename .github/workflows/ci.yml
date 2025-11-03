@@ -41,7 +41,16 @@ jobs:
         run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
 
       - name: Fuzz (10s)
-        run: go test -run=NONE -fuzz=Fuzz -fuzztime=10s ./...
+        run: |
+          set -e
+          for pkg in $(go list ./...); do
+            if go test -list '^Fuzz' "$pkg" | grep -q '^Fuzz'; then
+              echo "==> Fuzzing $pkg for 10s"
+              go test -run=NONE -fuzz=Fuzz -fuzztime=10s "$pkg"
+            else
+              echo "==> Skipping $pkg (no fuzz targets)"
+            fi
+          done
 
       - name: Upload coverage artifact
         if: always()
