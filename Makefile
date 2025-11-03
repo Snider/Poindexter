@@ -82,7 +82,7 @@ fuzz: ## Run Go fuzz tests for $(FUZZTIME)
 	  fi; \
 	  for fz in $$FUZZES; do \
 	    echo "==> Fuzzing $$pkg :: $$fz for $(FUZZTIME)"; \
-	    $(GO) test -run=NONE -fuzz="^$$fz$" -fuzztime=$(FUZZTIME) $$pkg; \
+	    $(GO) test -run=NONE -fuzz=^$${fz}$$ -fuzztime=$(FUZZTIME) $$pkg; \
 	  done; \
 	done
 
