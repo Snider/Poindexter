@@ -52,3 +52,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Examples
 
 - Find the best (lowest‑ping) DHT peer using KDTree: [Best Ping Peer (DHT)](dht-best-ping.md)
+- Multi-dimensional neighbor search over ping, hops, geo, and score: [Multi-Dimensional KDTree (DHT)](kdtree-multidimensional.md)
