@@ -40,9 +40,9 @@ func ExampleKDTree_Nearest() {
 		{ID: "y", Coords: []float64{2, 0}, Value: 2},
 	}
 	tr, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.EuclideanDistance{}))
-	p, d, ok := tr.Nearest([]float64{1, 0})
+	p, d, ok := tr.Nearest([]float64{1.4, 0})
 	fmt.Printf("ok=%v id=%s d=%.1f", ok, p.ID, d)
-	// Output: ok=true id=y d=1.0
+	// Output: ok=true id=y d=0.6
 }
 
 func ExampleKDTree_KNearest() {
@@ -69,7 +69,7 @@ func ExampleKDTree_Radius() {
 	// Output: 2 a b
 }
 
-func ExampleKDTree_InsertDeleteByID() {
+func ExampleKDTree_DeleteByID() {
 	pts := []poindexter.KDPoint[string]{
 		{ID: "A", Coords: []float64{0}, Value: "a"},
 	}
@@ -204,7 +204,7 @@ func ExampleBuild4DWithStats() {
 	// Output: 4
 }
 
-func ExampleNewKDTreeFromDim_Insert() {
+func ExampleNewKDTreeFromDim() {
 	// Construct an empty 2D tree, insert a point, then query.
 	tr, _ := poindexter.NewKDTreeFromDim[string](2)
 	tr.Insert(poindexter.KDPoint[string]{ID: "A", Coords: []float64{0.1, 0.2}, Value: "alpha"})
@@ -213,7 +213,7 @@ func ExampleNewKDTreeFromDim_Insert() {
 	// Output: ok=true id=A dim=2 len=1
 }
 
-func ExampleKDTree_TiesBehavior() {
+func Example_tiesBehavior() {
 	// Two points equidistant from the query; tie ordering is arbitrary,
 	// but distances are equal.
 	pts := []poindexter.KDPoint[int]{

@@ -9,7 +9,11 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - pkg.go.dev Examples: `ExampleNewKDTreeFromDim_Insert`, `ExampleKDTree_TiesBehavior`, `ExampleKDTree_Radius_none`.
 - Lint: enable `errcheck` in `.golangci.yml` with test-file exclusion to reduce noise.
 - CI: enable module cache in `actions/setup-go` to speed up workflows.
-- Docs: README cross-link to Performance page and add a concise “Choosing a metric” tip section.
+
+### Fixed
+- go vet failures in examples due to misnamed `Example*` functions; renamed to avoid referencing non-existent methods and identifiers.
+- Stabilized `ExampleKDTree_Nearest` to avoid a tie case; adjusted query and expected output.
+- Relaxed floating-point equality in `TestWeightedCosineDistance_Basics` to use an epsilon, avoiding spurious failures on some toolchains.
 
 ## [0.3.0] - 2025-11-03
 ### Added

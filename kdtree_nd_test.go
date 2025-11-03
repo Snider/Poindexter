@@ -47,8 +47,9 @@ func TestWeightedCosineDistance_Basics(t *testing.T) {
 	a := []float64{1, 0}
 	b := []float64{1, 0}
 	d := w.Distance(a, b)
-	if d != 0 {
-		t.Fatalf("expected 0, got %v", d)
+	// allow tiny floating-point noise
+	if d > 1e-12 {
+		t.Fatalf("expected ~0, got %v", d)
 	}
 	// orthogonal remains ~1 regardless of weights for these axes
 	b = []float64{0, 3}
