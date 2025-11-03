@@ -44,12 +44,15 @@ jobs:
         run: |
           set -e
           for pkg in $(go list ./...); do
-            if go test -list '^Fuzz' "$pkg" | grep -q '^Fuzz'; then
-              echo "==> Fuzzing $pkg for 10s"
-              go test -run=NONE -fuzz=Fuzz -fuzztime=10s "$pkg"
-            else
+            FUZZES=$(go test -list '^Fuzz' "$pkg" | grep '^Fuzz' || true)
+            if [ -z "$FUZZES" ]; then
               echo "==> Skipping $pkg (no fuzz targets)"
+              continue
             fi
+            for fz in $FUZZES; do
+              echo "==> Fuzzing $pkg :: $fz for 10s"
+              go test -run=NONE -fuzz="^$fz$" -fuzztime=10s "$pkg"
+            done
           done
 
       - name: Upload coverage artifact

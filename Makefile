@@ -73,14 +73,17 @@ coverhtml: cover ## Generate HTML coverage report at $(COVERHTML)
 .PHONY: fuzz
 fuzz: ## Run Go fuzz tests for $(FUZZTIME)
 	@set -e; \
-	PKGS="$$( $(GO) list ./... )"; \
+	PKGS="$$($(GO) list ./...)"; \
 	for pkg in $$PKGS; do \
-	  if $(GO) test -list '^Fuzz' $$pkg | grep -q '^Fuzz'; then \
-	    echo "==> Fuzzing $$pkg for $(FUZZTIME)"; \
-	    $(GO) test -run=NONE -fuzz=Fuzz -fuzztime=$(FUZZTIME) $$pkg; \
-	  else \
+	  FUZZES="$$($(GO) test -list '^Fuzz' $$pkg | grep '^Fuzz' || true)"; \
+	  if [ -z "$$FUZZES" ]; then \
 	    echo "==> Skipping $$pkg (no fuzz targets)"; \
+	    continue; \
 	  fi; \
+	  for fz in $$FUZZES; do \
+	    echo "==> Fuzzing $$pkg :: $$fz for $(FUZZTIME)"; \
+	    $(GO) test -run=NONE -fuzz="^$$fz$" -fuzztime=$(FUZZTIME) $$pkg; \
+	  done; \
 	done
 
 .PHONY: bench
