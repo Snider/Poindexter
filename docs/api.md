@@ -316,3 +316,60 @@ Performs a binary search on a sorted slice of strings.
 
 **Returns:**
 - `int`: The index where target is found, or -1 if not found
+
+
+## KDTree Helpers
+
+Poindexter provides helpers to build normalized, weighted KD points from your own records. These functions min–max normalize each axis over your dataset, optionally invert axes where higher is better (to turn them into “lower cost”), and apply per‑axis weights.
+
+```go
+func Build2D[T any](
+    items []T,
+    id func(T) string,
+    f1, f2 func(T) float64,
+    weights [2]float64,
+    invert [2]bool,
+) ([]KDPoint[T], error)
+
+func Build3D[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3 func(T) float64,
+    weights [3]float64,
+    invert [3]bool,
+) ([]KDPoint[T], error)
+
+func Build4D[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3, f4 func(T) float64,
+    weights [4]float64,
+    invert [4]bool,
+) ([]KDPoint[T], error)
+```
+
+Example (4D over ping, hops, geo, score):
+
+```go
+// weights and inversion: flip score so higher is better → lower cost
+weights := [4]float64{1.0, 0.7, 0.2, 1.2}
+invert  := [4]bool{false, false, false, true}
+
+pts, err := poindexter.Build4D(
+    peers,
+    func(p Peer) string { return p.ID },
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+    func(p Peer) float64 { return p.GeoKM },
+    func(p Peer) float64 { return p.Score },
+    weights, invert,
+)
+if err != nil { panic(err) }
+
+kdt, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.EuclideanDistance{}))
+best, dist, _ := kdt.Nearest([]float64{0, 0, 0, 0})
+```
+
+Notes:
+- Keep and reuse your normalization parameters (min/max) if you need consistency across updates; otherwise rebuild points when the candidate set changes.
+- Use `invert` to turn “higher is better” features (like scores) into lower costs for distance calculations.

@@ -17,6 +17,17 @@ We will:
 
 ## Dataset
 
+We’ll use a small, made‑up set of DHT peers in each runnable example below. Each example declares its own `Peer` type and dataset so you can copy‑paste and run independently.
+
+## Normalization and weights
+
+To make heterogeneous units comparable (ms, hops, km, score), use the library helpers which:
+- Min‑max normalize each axis to [0,1] over your provided dataset
+- Optionally invert axes where “higher is better” so they become “lower cost”
+- Apply per‑axis weights so you can emphasize what matters
+
+Build 4‑D points and query them with helpers (full program):
+
 ```go
 package main
 
@@ -27,10 +38,10 @@ import (
 
 type Peer struct {
     ID        string
-    PingMS    float64 // milliseconds
-    Hops      float64 // hop count
-    GeoKM     float64 // crow‑flight distance in kilometers
-    Score     float64 // [0..1] trust/rep/capacity score (higher is better)
+    PingMS    float64
+    Hops      float64
+    GeoKM     float64
+    Score     float64
 }
 
 var peers = []Peer{
@@ -40,88 +51,26 @@ var peers = []Peer{
     {ID: "D", PingMS: 55, Hops: 1, GeoKM: 300,  Score: 0.95},
     {ID: "E", PingMS: 18, Hops: 2, GeoKM: 2200, Score: 0.80},
 }
-```
 
-## Normalization and weights
-
-We scale raw features to comparable magnitudes and flip `Score` so lower is better. For demo simplicity we will:
-- Min‑max normalize each axis to [0,1] over the current candidate set
-- Convert `Score` to a cost: `score_cost = 1 - score`
-- Apply weights to emphasize certain axes
-
-Helper functions:
-
-```go
-// minMax returns (min, max) of a slice.
-func minMax(xs []float64) (float64, float64) {
-    if len(xs) == 0 { return 0, 0 }
-    mn, mx := xs[0], xs[0]
-    for _, v := range xs[1:] {
-        if v < mn { mn = v }
-        if v > mx { mx = v }
-    }
-    return mn, mx
-}
-
-// scale01 maps v from [min,max] to [0,1]. If min==max, returns 0.
-func scale01(v, min, max float64) float64 {
-    if max == min { return 0 }
-    return (v - min) / (max - min)
-}
-```
-
-Build 4‑D points:
-
-```go
-// Weights to balance axes (tune to taste)
-var wPing, wHop, wGeo, wScore = 1.0, 0.7, 0.2, 1.2
-
-func build4D(peers []Peer) ([]poindexter.KDPoint[Peer], error) {
-    pings := make([]float64, len(peers))
-    hops  := make([]float64, len(peers))
-    geos  := make([]float64, len(peers))
-    scores:= make([]float64, len(peers))
-    for i, p := range peers {
-        pings[i], hops[i], geos[i], scores[i] = p.PingMS, p.Hops, p.GeoKM, p.Score
-    }
-    pMin, pMax := minMax(pings)
-    hMin, hMax := minMax(hops)
-    gMin, gMax := minMax(geos)
-    sMin, sMax := minMax(scores)
-
-    pts := make([]poindexter.KDPoint[Peer], len(peers))
-    for i, p := range peers {
-        pingN  := scale01(p.PingMS, pMin, pMax)
-        hopN   := scale01(p.Hops,   hMin, hMax)
-        geoN   := scale01(p.GeoKM,  gMin, gMax)
-        scoreC := 1 - scale01(p.Score, sMin, sMax) // lower is better
-
-        pts[i] = poindexter.KDPoint[Peer]{
-            ID:    p.ID,
-            Value: p,
-            Coords: []float64{
-                wPing*pingN,
-                wHop*hopN,
-                wGeo*geoN,
-                wScore*scoreC,
-            },
-        }
-    }
-    return pts, nil
-}
-```
-
-## 4‑D KDTree: Nearest, k‑NN, Radius
-
-```go
 func main() {
     // Build 4‑D KDTree using Euclidean (L2)
-    pts, _ := build4D(peers)
+    weights4 := [4]float64{1.0, 0.7, 0.2, 1.2}
+    invert4 := [4]bool{false, false, false, true} // invert score (higher is better)
+    pts, err := poindexter.Build4D(
+        peers,
+        func(p Peer) string { return p.ID },
+        func(p Peer) float64 { return p.PingMS },
+        func(p Peer) float64 { return p.Hops },
+        func(p Peer) float64 { return p.GeoKM },
+        func(p Peer) float64 { return p.Score },
+        weights4, invert4,
+    )
+    if err != nil { panic(err) }
     tree, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.EuclideanDistance{}))
 
-    // Query target preferences (you may construct a query in normalized/weighted space)
+    // Query target preferences (construct a query in normalized/weighted space)
     // Example: seek very low ping, low hops, moderate geo, high score (low score_cost)
-    query := []float64{wPing*0.0, wHop*0.2, wGeo*0.3, wScore*0.0}
+    query := []float64{weights4[0]*0.0, weights4[1]*0.2, weights4[2]*0.3, weights4[3]*0.0}
 
     // 1‑NN
     best, dist, ok := tree.Nearest(query)
@@ -147,95 +96,151 @@ func main() {
 
 ## 2‑D: Ping + Hop
 
-Sometimes you want a strict trade‑off between just latency and path length. Build 2‑D points (reuse normalization):
+Sometimes you want a strict trade‑off between just latency and path length. Build 2‑D points using helpers:
 
 ```go
-var wPing2, wHop2 = 1.0, 1.0
+package main
 
-func build2D_pingHop(peers []Peer) []poindexter.KDPoint[Peer] {
-    pings := make([]float64, len(peers))
-    hops  := make([]float64, len(peers))
-    for i, p := range peers { pings[i], hops[i] = p.PingMS, p.Hops }
-    pMin, pMax := minMax(pings)
-    hMin, hMax := minMax(hops)
+import (
+    "fmt"
+    poindexter "github.com/Snider/Poindexter"
+)
 
-    pts := make([]poindexter.KDPoint[Peer], len(peers))
-    for i, p := range peers {
-        pingN := scale01(p.PingMS, pMin, pMax)
-        hopN  := scale01(p.Hops,   hMin, hMax)
-        pts[i] = poindexter.KDPoint[Peer]{
-            ID:    p.ID,
-            Value: p,
-            Coords: []float64{ wPing2*pingN, wHop2*hopN },
-        }
-    }
-    return pts
+type Peer struct {
+    ID     string
+    PingMS float64
+    Hops   float64
 }
 
-func demo2D() {
-    pts := build2D_pingHop(peers)
-    tree, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.ManhattanDistance{})) // L1 favors axis‑aligned tradeoffs
+var peers = []Peer{
+    {ID: "A", PingMS: 22, Hops: 3},
+    {ID: "B", PingMS: 34, Hops: 2},
+    {ID: "C", PingMS: 15, Hops: 4},
+    {ID: "D", PingMS: 55, Hops: 1},
+    {ID: "E", PingMS: 18, Hops: 2},
+}
+
+func main() {
+    weights2 := [2]float64{1.0, 1.0}
+    invert2  := [2]bool{false, false}
+
+    pts2, err := poindexter.Build2D(
+        peers,
+        func(p Peer) string { return p.ID },     // id
+        func(p Peer) float64 { return p.PingMS },// f1: ping
+        func(p Peer) float64 { return p.Hops },  // f2: hops
+        weights2, invert2,
+    )
+    if err != nil { panic(err) }
+
+    tree2, _ := poindexter.NewKDTree(pts2, poindexter.WithMetric(poindexter.ManhattanDistance{})) // L1 favors axis‑aligned tradeoffs
     // Prefer very low ping, modest hops
-    query := []float64{wPing2*0.0, wHop2*0.3}
-    best, _, _ := tree.Nearest(query)
-    fmt.Println("2D best (ping+hop):", best.ID)
+    query2 := []float64{weights2[0]*0.0, weights2[1]*0.3}
+    best2, _, _ := tree2.Nearest(query2)
+    fmt.Println("2D best (ping+hop):", best2.ID)
 }
 ```
 
 ## 3‑D: Ping + Hop + Geo
 
-Add geography to discourage far peers when latency is similar:
+Add geography to discourage far peers when latency is similar. Use the 3‑D helper:
 
 ```go
-var wPing3, wHop3, wGeo3 = 1.0, 0.7, 0.3
+package main
 
-func build3D_pingHopGeo(peers []Peer) []poindexter.KDPoint[Peer] {
-    pings := make([]float64, len(peers))
-    hops  := make([]float64, len(peers))
-    geos  := make([]float64, len(peers))
-    for i, p := range peers { pings[i], hops[i], geos[i] = p.PingMS, p.Hops, p.GeoKM }
-    pMin, pMax := minMax(pings)
-    hMin, hMax := minMax(hops)
-    gMin, gMax := minMax(geos)
+import (
+    "fmt"
+    poindexter "github.com/Snider/Poindexter"
+)
 
-    pts := make([]poindexter.KDPoint[Peer], len(peers))
-    for i, p := range peers {
-        pingN := scale01(p.PingMS, pMin, pMax)
-        hopN  := scale01(p.Hops,   hMin, hMax)
-        geoN  := scale01(p.GeoKM,  gMin, gMax)
-        pts[i] = poindexter.KDPoint[Peer]{
-            ID:    p.ID,
-            Value: p,
-            Coords: []float64{ wPing3*pingN, wHop3*hopN, wGeo3*geoN },
-        }
-    }
-    return pts
+type Peer struct {
+    ID     string
+    PingMS float64
+    Hops   float64
+    GeoKM  float64
 }
 
-func demo3D() {
-    pts := build3D_pingHopGeo(peers)
-    tree, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.EuclideanDistance{}))
+var peers = []Peer{
+    {ID: "A", PingMS: 22, Hops: 3, GeoKM: 1200},
+    {ID: "B", PingMS: 34, Hops: 2, GeoKM: 800},
+    {ID: "C", PingMS: 15, Hops: 4, GeoKM: 4500},
+    {ID: "D", PingMS: 55, Hops: 1, GeoKM: 300},
+    {ID: "E", PingMS: 18, Hops: 2, GeoKM: 2200},
+}
+
+func main() {
+    weights3 := [3]float64{1.0, 0.7, 0.3}
+    invert3  := [3]bool{false, false, false}
+
+    pts3, err := poindexter.Build3D(
+        peers,
+        func(p Peer) string { return p.ID },
+        func(p Peer) float64 { return p.PingMS },
+        func(p Peer) float64 { return p.Hops },
+        func(p Peer) float64 { return p.GeoKM },
+        weights3, invert3,
+    )
+    if err != nil { panic(err) }
+
+    tree3, _ := poindexter.NewKDTree(pts3, poindexter.WithMetric(poindexter.EuclideanDistance{}))
     // Prefer low ping/hop, modest geo
-    query := []float64{wPing3*0.0, wHop3*0.2, wGeo3*0.4}
-    top, _, _ := tree.Nearest(query)
-    fmt.Println("3D best (ping+hop+geo):", top.ID)
+    query3 := []float64{weights3[0]*0.0, weights3[1]*0.2, weights3[2]*0.4}
+    top3, _, _ := tree3.Nearest(query3)
+    fmt.Println("3D best (ping+hop+geo):", top3.ID)
 }
 ```
 
 ## Dynamic updates
 
-Your routing table changes constantly. Insert/remove peers without rebuilding:
+Your routing table changes constantly. Insert/remove peers. For consistent normalization, rebuild points when the candidate set changes (or cache and reuse your min/max stats).
 
 ```go
-func updatesExample() {
-    pts := build2D_pingHop(peers)
+package main
+
+import (
+    "fmt"
+    poindexter "github.com/Snider/Poindexter"
+)
+
+type Peer struct {
+    ID     string
+    PingMS float64
+    Hops   float64
+}
+
+var peers = []Peer{
+    {ID: "A", PingMS: 22, Hops: 3},
+    {ID: "B", PingMS: 34, Hops: 2},
+    {ID: "C", PingMS: 15, Hops: 4},
+}
+
+func main() {
+    // Initial 2‑D build (ping + hops)
+    weights2 := [2]float64{1.0, 1.0}
+    invert2  := [2]bool{false, false}
+    pts, _ := poindexter.Build2D(
+        peers,
+        func(p Peer) string { return p.ID },
+        func(p Peer) float64 { return p.PingMS },
+        func(p Peer) float64 { return p.Hops },
+        weights2, invert2,
+    )
     tree, _ := poindexter.NewKDTree(pts)
 
-    // Insert a new peer
-    newPeer := Peer{ID: "Z", PingMS: 12, Hops: 2, GeoKM: 900, Score: 0.88}
-    // Build consistent 2D point for the new peer. In a real system retain normalization mins/maxes.
-    ptsZ := build2D_pingHop([]Peer{newPeer})
-    _ = tree.Insert(ptsZ[0])
+    // Insert a new peer: rebuild its point using the same helper.
+    newPeer := Peer{ID: "Z", PingMS: 12, Hops: 2}
+    addPts, _ := poindexter.Build2D(
+        []Peer{newPeer},
+        func(p Peer) string { return p.ID },
+        func(p Peer) float64 { return p.PingMS },
+        func(p Peer) float64 { return p.Hops },
+        weights2, invert2,
+    )
+    _ = tree.Insert(addPts[0])
+
+    // Verify nearest now prefers Z for low ping target
+    best, _, _ := tree.Nearest([]float64{0, 0})
+    fmt.Println("Best after insert:", best.ID)
 
     // Delete by ID when peer goes offline
     _ = tree.DeleteByID("Z")

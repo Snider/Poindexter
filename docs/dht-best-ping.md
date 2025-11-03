@@ -8,7 +8,7 @@ This example shows how to model a "made up" DHT routing table and use Poindexter
 
 We keep it simple by mapping each peer to a 1‑dimensional coordinate: its ping in milliseconds. Using 1D means the KDTree's distance is just the absolute difference between pings.
 
-> Tip: In a real system, you might expand to multiple dimensions (e.g., `[ping_ms, hop_count, geo_distance, score]`) and choose a metric (`L1`, `L2`, or `L∞`) that best matches your routing heuristic.
+> Tip: In a real system, you might expand to multiple dimensions (e.g., `[ping_ms, hop_count, geo_distance, score]`) and choose a metric (`L1`, `L2`, or `L∞`) that best matches your routing heuristic. See how to build normalized, weighted multi‑dimensional points with the public helpers `poindexter.Build2D/3D/4D` here: [Multi-Dimensional KDTree (DHT)](kdtree-multidimensional.md).
 
 ---
 
