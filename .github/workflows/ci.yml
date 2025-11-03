@@ -40,6 +40,9 @@ jobs:
       - name: Test (race + coverage)
         run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
 
+      - name: Fuzz (10s)
+        run: go test -run=NONE -fuzz=Fuzz -fuzztime=10s ./...
+
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v4
