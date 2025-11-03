@@ -1,5 +1,10 @@
 # Poindexter
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/Snider/Poindexter.svg)](https://pkg.go.dev/github.com/Snider/Poindexter)
+[![CI](https://github.com/Snider/Poindexter/actions/workflows/ci.yml/badge.svg)](https://github.com/Snider/Poindexter/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Snider/Poindexter)](https://goreportcard.com/report/github.com/Snider/Poindexter)
+[![Vulncheck](https://img.shields.io/badge/govulncheck-enabled-brightgreen.svg)](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck)
+
 A Go library package providing utility functions including sorting algorithms with custom comparators.
 
 ## Features
@@ -58,6 +63,18 @@ func main() {
 ## Documentation
 
 Full documentation is available at [https://snider.github.io/Poindexter/](https://snider.github.io/Poindexter/)
+
+Explore runnable examples in the repository:
+- examples/dht_ping_1d
+- examples/kdtree_2d_ping_hop
+- examples/kdtree_3d_ping_hop_geo
+- examples/kdtree_4d_ping_hop_geo_score
+
+### KDTree performance and notes
+- Current KDTree queries are O(n) linear scans, which are great for small-to-medium datasets or low-latency prototyping. For 1e5+ points and low/medium dimensions, consider swapping the internal engine to `gonum.org/v1/gonum/spatial/kdtree` (the API here is compatible by design).
+- Insert is O(1) amortized; delete by ID is O(1) via swap-delete; order is not preserved.
+- Concurrency: the KDTree type is not safe for concurrent mutation. Protect with a mutex or share immutable snapshots for read-mostly workloads.
+- See multi-dimensional examples (ping/hops/geo/score) in docs and `examples/`.
 
 ## License
 

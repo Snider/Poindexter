@@ -373,3 +373,40 @@ best, dist, _ := kdt.Nearest([]float64{0, 0, 0, 0})
 Notes:
 - Keep and reuse your normalization parameters (min/max) if you need consistency across updates; otherwise rebuild points when the candidate set changes.
 - Use `invert` to turn “higher is better” features (like scores) into lower costs for distance calculations.
+
+
+---
+
+## KDTree Constructors and Errors
+
+### NewKDTree
+
+```go
+func NewKDTree[T any](pts []KDPoint[T], opts ...KDOption) (*KDTree[T], error)
+```
+
+Build a KDTree from the provided points. All points must have the same dimensionality (> 0) and IDs (if provided) must be unique.
+
+Possible errors:
+- `ErrEmptyPoints`: no points provided
+- `ErrZeroDim`: dimension must be at least 1
+- `ErrDimMismatch`: inconsistent dimensionality among points
+- `ErrDuplicateID`: duplicate point ID encountered
+
+### NewKDTreeFromDim
+
+```go
+func NewKDTreeFromDim[T any](dim int, opts ...KDOption) (*KDTree[T], error)
+```
+
+Construct an empty KDTree with the given dimension, then populate later via `Insert`.
+
+---
+
+## KDTree Notes: Complexity, Ties, Concurrency
+
+- Complexity: current implementation uses O(n) linear scans for queries (`Nearest`, `KNearest`, `Radius`). Inserts are O(1) amortized. Deletes by ID are O(1) using swap-delete (order not preserved).
+- Tie ordering: when multiple neighbors have the same distance, ordering of ties is arbitrary and not stable between calls.
+- Concurrency: KDTree is not safe for concurrent mutation. Wrap with a mutex or share immutable snapshots for read-mostly workloads.
+
+See runnable examples in the repository `examples/` and the docs pages for 1D DHT and multi-dimensional KDTree usage.

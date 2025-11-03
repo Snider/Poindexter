@@ -86,8 +86,13 @@ type kdOptions struct {
 func WithMetric(m DistanceMetric) KDOption { return func(o *kdOptions) { o.metric = m } }
 
 // KDTree is a lightweight wrapper providing nearest-neighbor operations.
-// Note: This implementation currently uses linear scans for queries
-// and is designed to be easily swappable with gonum.org/v1/gonum/spatial/kdtree
+//
+// Complexity: queries are O(n) linear scans in the current implementation.
+// Inserts are O(1) amortized; deletes by ID are O(1) using swap-delete (order not preserved).
+// Concurrency: KDTree is not safe for concurrent mutation. Guard with a mutex or
+// share immutable snapshots for read-mostly workloads.
+//
+// This type is designed to be easily swappable with gonum.org/v1/gonum/spatial/kdtree
 // in the future without breaking the public API.
 type KDTree[T any] struct {
 	points  []KDPoint[T]
@@ -156,7 +161,7 @@ func (t *KDTree[T]) Dim() int { return t.dim }
 func (t *KDTree[T]) Len() int { return len(t.points) }
 
 // Nearest returns the closest point to the query, along with its distance.
-// ok is false if the tree is empty.
+// ok is false if the tree is empty or the query dimensionality does not match Dim().
 func (t *KDTree[T]) Nearest(query []float64) (KDPoint[T], float64, bool) {
 	if len(query) != t.dim || t.Len() == 0 {
 		return KDPoint[T]{}, 0, false
@@ -177,6 +182,7 @@ func (t *KDTree[T]) Nearest(query []float64) (KDPoint[T], float64, bool) {
 }
 
 // KNearest returns up to k nearest neighbors to the query in ascending distance order.
+// If multiple points are at the same distance, tie ordering is arbitrary and not stable between calls.
 func (t *KDTree[T]) KNearest(query []float64, k int) ([]KDPoint[T], []float64) {
 	if k <= 0 || len(query) != t.dim || t.Len() == 0 {
 		return nil, nil
