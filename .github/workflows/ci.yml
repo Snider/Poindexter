@@ -36,14 +36,39 @@ jobs:
       - name: Vet
         run: go vet ./...
 
-      - name: Test (race)
-        run: go test -race ./...
+      - name: Test (race + coverage)
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.go-version }}
+          path: coverage.out
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.out
+          flags: unit
+          fail_ci_if_error: false
 
       - name: Build examples
         run: |
           if [ -d examples ]; then
             go build ./examples/...
           fi
+
+      - name: Benchmarks (benchmem)
+        run: |
+          go test -bench . -benchmem -run=^$ ./... | tee bench-${{ matrix.go-version }}.txt
+
+      - name: Upload benchmark artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-${{ matrix.go-version }}
+          path: bench-${{ matrix.go-version }}.txt
 
       - name: Vulncheck
         uses: golang/govulncheck-action@v1

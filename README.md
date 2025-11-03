@@ -4,6 +4,7 @@
 [![CI](https://github.com/Snider/Poindexter/actions/workflows/ci.yml/badge.svg)](https://github.com/Snider/Poindexter/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Snider/Poindexter)](https://goreportcard.com/report/github.com/Snider/Poindexter)
 [![Vulncheck](https://img.shields.io/badge/govulncheck-enabled-brightgreen.svg)](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck)
+[![codecov](https://codecov.io/gh/Snider/Poindexter/branch/main/graph/badge.svg)](https://codecov.io/gh/Snider/Poindexter)
 
 A Go library package providing utility functions including sorting algorithms with custom comparators.
 

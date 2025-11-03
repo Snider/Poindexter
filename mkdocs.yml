@@ -59,6 +59,7 @@ nav:
       - Best Ping Peer (DHT): dht-best-ping.md
       - Multi-Dimensional KDTree (DHT): kdtree-multidimensional.md
   - API Reference: api.md
+  - Performance: perf.md
   - License: license.md
 
 copyright: Copyright &copy; 2025 Snider
