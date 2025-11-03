@@ -54,8 +54,16 @@ race: ## Run tests with race detector
 
 .PHONY: cover
 cover: ## Run tests with race + coverage and summarize
-	$(GO) test -race -coverprofile=$(COVEROUT) -covermode=atomic ./...
+	$(GO) test -race -coverprofile=$(COVEROUT) -covermode=atomic  ./...
 	@$(GO) tool cover -func=$(COVEROUT) | tail -n 1
+
+.PHONY: coverfunc
+coverfunc: ## Print per-function coverage from $(COVEROUT)
+	@$(GO) tool cover -func=$(COVEROUT)
+
+.PHONY: cover-kdtree
+cover-kdtree: ## Print coverage details for kdtree.go only
+	@$(GO) tool cover -func=$(COVEROUT) | grep 'kdtree.go' || true
 
 .PHONY: coverhtml
 coverhtml: cover ## Generate HTML coverage report at $(COVERHTML)

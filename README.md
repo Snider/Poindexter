@@ -101,6 +101,8 @@ The repository includes a maintainer-friendly `Makefile` that mirrors CI tasks a
 - race — run tests with the race detector
 - cover — run tests with race + coverage (writes `coverage.out` and prints summary)
 - coverhtml — render HTML coverage report to `coverage.html`
+- coverfunc — print per-function coverage (from `coverage.out`)
+- cover-kdtree — print coverage details filtered to `kdtree.go`
 - fuzz — run Go fuzzing for a configurable time (default 10s) matching CI
 - bench — run benchmarks with `-benchmem` (writes `bench.txt`)
 - lint — run `golangci-lint` (if installed)
