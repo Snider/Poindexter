@@ -47,3 +47,8 @@ This project is licensed under the European Union Public Licence v1.2 (EUPL-1.2)
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+
+## Examples
+
+- Find the best (lowest‑ping) DHT peer using KDTree: [Best Ping Peer (DHT)](dht-best-ping.md)

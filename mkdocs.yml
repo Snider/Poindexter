@@ -55,6 +55,8 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Examples:
+      - Best Ping Peer (DHT): dht-best-ping.md
   - API Reference: api.md
   - License: license.md
 

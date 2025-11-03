@@ -122,4 +122,5 @@ func main() {
 ## Next Steps
 
 - Check out the [API Reference](api.md) for detailed documentation
+- Try the example: [Find the best (lowest‑ping) DHT peer](dht-best-ping.md)
 - Read about the [License](license.md)
