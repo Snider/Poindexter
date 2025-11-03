@@ -6,6 +6,17 @@ import (
 	"sort"
 )
 
+var (
+	// ErrEmptyPoints indicates that no points were provided to build a KDTree.
+	ErrEmptyPoints = errors.New("kdtree: no points provided")
+	// ErrZeroDim indicates that points or tree dimension must be at least 1.
+	ErrZeroDim = errors.New("kdtree: points must have at least one dimension")
+	// ErrDimMismatch indicates inconsistent dimensionality among points.
+	ErrDimMismatch = errors.New("kdtree: inconsistent dimensionality in points")
+	// ErrDuplicateID indicates a duplicate point ID was encountered.
+	ErrDuplicateID = errors.New("kdtree: duplicate point ID")
+)
+
 // KDPoint represents a point with coordinates and an attached payload/value.
 // ID should be unique within a tree to enable O(1) deletes by ID.
 // Coords must all have the same dimensionality within a given KDTree.
@@ -89,20 +100,20 @@ type KDTree[T any] struct {
 // All points must have the same dimensionality (>0).
 func NewKDTree[T any](pts []KDPoint[T], opts ...KDOption) (*KDTree[T], error) {
 	if len(pts) == 0 {
-		return nil, errors.New("no points provided")
+		return nil, ErrEmptyPoints
 	}
 	dim := len(pts[0].Coords)
 	if dim == 0 {
-		return nil, errors.New("points must have at least one dimension")
+		return nil, ErrZeroDim
 	}
 	idIndex := make(map[string]int, len(pts))
 	for i, p := range pts {
 		if len(p.Coords) != dim {
-			return nil, errors.New("inconsistent dimensionality in points")
+			return nil, ErrDimMismatch
 		}
 		if p.ID != "" {
 			if _, exists := idIndex[p.ID]; exists {
-				return nil, errors.New("duplicate point ID: " + p.ID)
+				return nil, ErrDuplicateID
 			}
 			idIndex[p.ID] = i
 		}
@@ -118,6 +129,24 @@ func NewKDTree[T any](pts []KDPoint[T], opts ...KDOption) (*KDTree[T], error) {
 		idIndex: idIndex,
 	}
 	return t, nil
+}
+
+// NewKDTreeFromDim constructs an empty KDTree with the specified dimension.
+// Call Insert to add points after construction.
+func NewKDTreeFromDim[T any](dim int, opts ...KDOption) (*KDTree[T], error) {
+	if dim <= 0 {
+		return nil, ErrZeroDim
+	}
+	cfg := kdOptions{metric: EuclideanDistance{}}
+	for _, o := range opts {
+		o(&cfg)
+	}
+	return &KDTree[T]{
+		points:  nil,
+		dim:     dim,
+		metric:  cfg.metric,
+		idIndex: make(map[string]int),
+	}, nil
 }
 
 // Dim returns the number of dimensions.
