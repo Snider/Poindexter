@@ -13,13 +13,13 @@ func Version() string
 Returns the current version of the library.
 
 **Returns:**
-- `string`: The version string (e.g., "0.2.1")
+- `string`: The version string (e.g., "0.3.0")
 
 **Example:**
 
 ```go
 version := poindexter.Version()
-fmt.Println(version) // Output: 0.2.1
+fmt.Println(version) // Output: 0.3.0
 ```
 
 ---

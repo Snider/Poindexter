@@ -67,8 +67,17 @@ func FuzzMetrics_NoNegative(f *testing.F) {
 		m1 := EuclideanDistance{}.Distance(a, b)
 		m2 := ManhattanDistance{}.Distance(a, b)
 		m3 := ChebyshevDistance{}.Distance(a, b)
-		if m1 < 0 || m2 < 0 || m3 < 0 {
-			t.Fatalf("negative metric: %v %v %v", m1, m2, m3)
+		m4 := CosineDistance{}.Distance(a, b)
+		w := make([]float64, dim)
+		for i := range w {
+			w[i] = 1
+		}
+		m5 := WeightedCosineDistance{Weights: w}.Distance(a, b)
+		if m1 < 0 || m2 < 0 || m3 < 0 || m4 < 0 || m5 < 0 {
+			t.Fatalf("negative metric: %v %v %v %v %v", m1, m2, m3, m4, m5)
+		}
+		if m4 > 2 || m5 > 2 {
+			t.Fatalf("cosine distance out of bounds: %v %v", m4, m5)
 		}
 	})
 }

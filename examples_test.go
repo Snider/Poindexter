@@ -140,6 +140,46 @@ func ExampleBuild2DWithStats() {
 	// Output: dim=2 len=3
 }
 
+func ExampleBuildND() {
+	type rec struct{ a, b, c float64 }
+	items := []rec{{0, 0, 0}, {1, 2, 3}, {0.5, 1, 1.5}}
+	features := []func(rec) float64{
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+		func(r rec) float64 { return r.c },
+	}
+	weights := []float64{1, 0.5, 2}
+	invert := []bool{false, false, false}
+	pts, _ := poindexter.BuildND(items, func(r rec) string { return "" }, features, weights, invert)
+	tr, _ := poindexter.NewKDTree(pts)
+	fmt.Printf("dim=%d len=%d", tr.Dim(), tr.Len())
+	// Output: dim=3 len=3
+}
+
+func ExampleBuildNDWithStats() {
+	type rec struct{ a, b float64 }
+	items := []rec{{0, 0}, {1, 2}, {0.5, 1}}
+	features := []func(rec) float64{
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+	}
+	stats, _ := poindexter.ComputeNormStatsND(items, features)
+	weights := []float64{1, 0.5}
+	invert := []bool{false, false}
+	pts, _ := poindexter.BuildNDWithStats(items, func(r rec) string { return "" }, features, weights, invert, stats)
+	tr, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.CosineDistance{}))
+	fmt.Printf("dim=%d len=%d", tr.Dim(), tr.Len())
+	// Output: dim=2 len=3
+}
+
+func ExampleCosineDistance() {
+	a := []float64{1, 0}
+	b := []float64{0, 1}
+	d := poindexter.CosineDistance{}.Distance(a, b)
+	fmt.Printf("%.0f", d)
+	// Output: 1
+}
+
 func ExampleBuild4DWithStats() {
 	type rec struct{ a, b, c, d float64 }
 	items := []rec{{0, 0, 0, 0}, {1, 1, 1, 1}}

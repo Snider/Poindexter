@@ -10,6 +10,17 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Lint: enable `errcheck` in `.golangci.yml` with test-file exclusion to reduce noise.
 - CI: enable module cache in `actions/setup-go` to speed up workflows.
 
+## [0.3.0] - 2025-11-03
+### Added
+- New distance metrics: `CosineDistance` and `WeightedCosineDistance` (1 - cosine similarity), with robust zero-vector handling and bounds.
+- N-D normalization helpers: `ComputeNormStatsND`, `BuildND`, `BuildNDWithStats` for arbitrary dimensions, with validation errors (`ErrInvalidFeatures`, `ErrInvalidWeights`, `ErrInvalidInvert`, `ErrStatsDimMismatch`).
+- Tests: unit tests for cosine/weighted-cosine metrics; parity tests between `Build4D` and `BuildND`; error-path tests; extended fuzz to include cosine metrics.
+- pkg.go.dev examples: `ExampleBuildND`, `ExampleBuildNDWithStats`, `ExampleCosineDistance`.
+
+### Changed
+- Version bumped to `0.3.0`.
+- README: list Cosine among supported metrics.
+
 ## [0.2.1] - 2025-11-03
 ### Added
 - Normalization stats helpers: `AxisStats`, `NormStats`, `ComputeNormStats2D/3D/4D`.

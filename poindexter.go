@@ -3,7 +3,7 @@ package poindexter
 
 // Version returns the current version of the library.
 func Version() string {
-	return "0.2.1"
+	return "0.3.0"
 }
 
 // Hello returns a greeting message.

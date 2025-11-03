@@ -75,6 +75,97 @@ func (ChebyshevDistance) Distance(a, b []float64) float64 {
 	return max
 }
 
+// CosineDistance implements 1 - cosine similarity.
+//
+// Distance is defined as 1 - (a·b)/(||a||*||b||). If both vectors are zero,
+// distance is 0. If exactly one is zero, distance is 1. Numerical results are
+// clamped to [0,2].
+// Note: For typical normalized/weighted feature vectors with non-negative entries,
+// the value will be in [0,1]. Opposite vectors in general spaces can yield up to 2.
+type CosineDistance struct{}
+
+func (CosineDistance) Distance(a, b []float64) float64 {
+	var dot, na2, nb2 float64
+	for i := range a {
+		ai := a[i]
+		bi := b[i]
+		dot += ai * bi
+		na2 += ai * ai
+		nb2 += bi * bi
+	}
+	if na2 == 0 && nb2 == 0 {
+		return 0
+	}
+	if na2 == 0 || nb2 == 0 {
+		return 1
+	}
+	den := math.Sqrt(na2) * math.Sqrt(nb2)
+	if den == 0 { // guard, though covered above
+		return 1
+	}
+	cos := dot / den
+	if cos > 1 {
+		cos = 1
+	} else if cos < -1 {
+		cos = -1
+	}
+	d := 1 - cos
+	if d < 0 {
+		return 0
+	}
+	if d > 2 {
+		return 2
+	}
+	return d
+}
+
+// WeightedCosineDistance implements 1 - weighted cosine similarity, where weights
+// scale each axis in both the dot product and the norms.
+// If Weights is nil or has zero length, this reduces to CosineDistance.
+type WeightedCosineDistance struct{ Weights []float64 }
+
+func (wcd WeightedCosineDistance) Distance(a, b []float64) float64 {
+	w := wcd.Weights
+	if len(w) == 0 || len(w) != len(a) || len(a) != len(b) {
+		// Fallback to unweighted cosine when lengths mismatch or weights missing.
+		return CosineDistance{}.Distance(a, b)
+	}
+	var dot, na2, nb2 float64
+	for i := range a {
+		wi := w[i]
+		ai := a[i]
+		bi := b[i]
+		v := wi * ai
+		dot += v * bi         // wi*ai*bi
+		na2 += v * ai         // wi*ai*ai
+		nb2 += (wi * bi) * bi // wi*bi*bi
+	}
+	if na2 == 0 && nb2 == 0 {
+		return 0
+	}
+	if na2 == 0 || nb2 == 0 {
+		return 1
+	}
+	den := math.Sqrt(na2) * math.Sqrt(nb2)
+	if den == 0 {
+		return 1
+	}
+	cos := dot / den
+	if cos > 1 {
+		cos = 1
+	} else if cos < -1 {
+		cos = -1
+	}
+	d := 1 - cos
+	if d < 0 {
+		return 0
+	}
+	if d > 2 {
+		return 2
+	}
+	return d
+}
+
 // KDOption configures KDTree construction (non-generic to allow inference).
 type KDOption func(*kdOptions)
 
