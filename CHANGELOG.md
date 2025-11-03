@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
 ## [Unreleased]
+### Added
+- pkg.go.dev Examples: `ExampleNewKDTreeFromDim_Insert`, `ExampleKDTree_TiesBehavior`, `ExampleKDTree_Radius_none`.
+- Lint: enable `errcheck` in `.golangci.yml` with test-file exclusion to reduce noise.
+- CI: enable module cache in `actions/setup-go` to speed up workflows.
 
 ## [0.2.1] - 2025-11-03
 ### Added

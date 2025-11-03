@@ -8,13 +8,22 @@ linters:
     - ineffassign
     - gofmt
     - revive
+    - errcheck
 issues:
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-rules:
+    # Errcheck is noisy in examples and doc tests; ignore *_test.go for errcheck only.
+    - path: _test\.go
+      linters:
+        - errcheck
 linters-settings:
   revive:
     severity: warning
     rules:
       - name: exported
         arguments: ["disable"] # keep comments pragmatic; we have pkg docs and key API docs
+  errcheck:
+    # Be pragmatic: don't require checking of Close for defer patterns in tests/examples.
+    # (Keep defaults; exclusions above handle test files.)

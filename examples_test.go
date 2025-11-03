@@ -163,3 +163,38 @@ func ExampleBuild4DWithStats() {
 	fmt.Println(tr.Dim())
 	// Output: 4
 }
+
+func ExampleNewKDTreeFromDim_Insert() {
+	// Construct an empty 2D tree, insert a point, then query.
+	tr, _ := poindexter.NewKDTreeFromDim[string](2)
+	tr.Insert(poindexter.KDPoint[string]{ID: "A", Coords: []float64{0.1, 0.2}, Value: "alpha"})
+	p, _, ok := tr.Nearest([]float64{0, 0})
+	fmt.Printf("ok=%v id=%s dim=%d len=%d", ok, p.ID, tr.Dim(), tr.Len())
+	// Output: ok=true id=A dim=2 len=1
+}
+
+func ExampleKDTree_TiesBehavior() {
+	// Two points equidistant from the query; tie ordering is arbitrary,
+	// but distances are equal.
+	pts := []poindexter.KDPoint[int]{
+		{ID: "L", Coords: []float64{-1}},
+		{ID: "R", Coords: []float64{+1}},
+	}
+	tr, _ := poindexter.NewKDTree(pts)
+	ns, ds := tr.KNearest([]float64{0}, 2)
+	_ = ns // neighbor order is unspecified
+	fmt.Printf("equal=%.1f==%.1f? %v", ds[0], ds[1], ds[0] == ds[1])
+	// Output: equal=1.0==1.0? true
+}
+
+func ExampleKDTree_Radius_none() {
+	// Radius query that yields no matches.
+	pts := []poindexter.KDPoint[int]{
+		{ID: "a", Coords: []float64{10}},
+		{ID: "b", Coords: []float64{20}},
+	}
+	tr, _ := poindexter.NewKDTree(pts)
+	within, _ := tr.Radius([]float64{0}, 5)
+	fmt.Println(len(within))
+	// Output: 0
+}
