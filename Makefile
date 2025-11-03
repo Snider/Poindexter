@@ -40,6 +40,36 @@ vet: ## Run go vet
 build: ## Build all packages
 	$(GO) build ./...
 
+# WebAssembly build outputs
+DIST_DIR ?= dist
+WASM_OUT ?= $(DIST_DIR)/poindexter.wasm
+WASM_EXEC ?= $(shell $(GO) env GOROOT)/lib/wasm/wasm_exec.js
+
+.PHONY: wasm-build
+wasm-build: ## Build WebAssembly module to $(WASM_OUT)
+	@mkdir -p $(DIST_DIR)
+	GOOS=js GOARCH=wasm $(GO) build -o $(WASM_OUT) ./wasm
+	@set -e; \
+	if [ -n "$$WASM_EXEC" ] && [ -f "$$WASM_EXEC" ]; then \
+	  cp "$$WASM_EXEC" $(DIST_DIR)/wasm_exec.js; \
+	else \
+	  CAND1="$$($(GO) env GOROOT)/lib/wasm/wasm_exec.js"; \
+	  CAND2="$$($(GO) env GOROOT)/libexec/lib/wasm/wasm_exec.js"; \
+	  if [ -f "$$CAND1" ]; then cp "$$CAND1" $(DIST_DIR)/wasm_exec.js; \
+	  elif [ -f "$$CAND2" ]; then cp "$$CAND2" $(DIST_DIR)/wasm_exec.js; \
+	  else echo "Warning: could not locate wasm_exec.js under GOROOT or WASM_EXEC; please copy it manually"; fi; \
+	fi
+	@echo "WASM built: $(WASM_OUT)"
+
+.PHONY: npm-pack
+npm-pack: wasm-build ## Prepare npm package folder with dist artifacts
+	@mkdir -p npm/poindexter-wasm
+	@rm -rf npm/poindexter-wasm/dist
+	@cp -R $(DIST_DIR) npm/poindexter-wasm/dist
+	@cp LICENSE npm/poindexter-wasm/LICENSE
+	@cp README.md npm/poindexter-wasm/PROJECT_README.md
+	@echo "npm package prepared in npm/poindexter-wasm"
+
 .PHONY: examples
 examples: ## Build all example programs under examples/
 	@if [ -d examples ]; then $(GO) build ./examples/...; else echo "No examples/ directory"; fi
@@ -99,7 +129,7 @@ vuln: ## Run govulncheck (requires it installed)
 	govulncheck ./...
 
 .PHONY: ci
-ci: tidy-check build vet cover examples bench lint vuln ## CI-parity local run
+ci: tidy-check build vet cover examples bench lint vuln wasm-build ## CI-parity local run (includes wasm-build)
 	@echo "CI-like checks completed"
 
 .PHONY: release

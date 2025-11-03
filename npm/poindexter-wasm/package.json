@@ -1,0 +1,27 @@
+{
+  "name": "@snider/poindexter-wasm",
+  "version": "0.0.0-development",
+  "description": "Poindexter KD-Tree WebAssembly build for browsers (Angular/SPA ready)",
+  "license": "MIT",
+  "author": "Snider",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./loader.js",
+      "require": "./loader.cjs"
+    }
+  },
+  "module": "./loader.js",
+  "main": "./loader.cjs",
+  "types": "./index.d.ts",
+  "files": [
+    "dist/poindexter.wasm",
+    "dist/wasm_exec.js",
+    "loader.js",
+    "loader.cjs",
+    "index.d.ts",
+    "README.md",
+    "LICENSE",
+    "PROJECT_README.md"
+  ]
+}

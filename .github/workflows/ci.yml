@@ -2,97 +2,72 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: ["**"]
   pull_request:
-    branches: [ main, master ]
+    branches: ["**"]
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    name: Build & Test
+  build-test-wasm:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [ '1.22.x', '1.23.x' ]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Go ${{ matrix.go-version }}
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
-          cache: true
+          go-version: '1.23.x'
+
+      - name: Install extra tools
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Go env
         run: go env
 
-      - name: Tidy check
+      - name: CI checks (lint, tests, coverage, etc.)
+        run: make ci
+
+      - name: Build WebAssembly module
+        run: make wasm-build
+
+      - name: Prepare npm package folder
+        run: make npm-pack
+
+      - name: Create npm tarball
+        id: npm_pack
         run: |
-          go mod tidy
-          git diff --exit-code -- go.mod go.sum
+          echo "tarball=$(npm pack ./npm/poindexter-wasm)" >> "$GITHUB_OUTPUT"
 
-      - name: Build
-        run: go build ./...
-
-      - name: Vet
-        run: go vet ./...
-
-      - name: Test (race + coverage)
-        run: go test -race -coverprofile=coverage.out -covermode=atomic -coverpkg=./... ./...
-
-      - name: Fuzz (10s)
-        run: |
-          set -e
-          for pkg in $(go list ./...); do
-            FUZZES=$(go test -list '^Fuzz' "$pkg" | grep '^Fuzz' || true)
-            if [ -z "$FUZZES" ]; then
-              echo "==> Skipping $pkg (no fuzz targets)"
-              continue
-            fi
-            for fz in $FUZZES; do
-              echo "==> Fuzzing $pkg :: $fz for 10s"
-              go test -run=NONE -fuzz="^$fz$" -fuzztime=10s "$pkg"
-            done
-          done
-
-      - name: Upload coverage artifact
-        if: always()
+      - name: Upload dist (WASM artifacts)
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.go-version }}
-          path: coverage.out
+          name: poindexter-wasm-dist
+          if-no-files-found: error
+          path: |
+            dist/poindexter.wasm
+            dist/wasm_exec.js
 
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: coverage.out
-          flags: unit
-          fail_ci_if_error: false
-
-      - name: Build examples
-        run: |
-          if [ -d examples ]; then
-            go build ./examples/...
-          fi
-
-      - name: Benchmarks (benchmem)
-        run: |
-          go test -bench . -benchmem -run=^$ ./... | tee bench-${{ matrix.go-version }}.txt
-
-      - name: Upload benchmark artifact
-        if: always()
+      - name: Upload npm package folder
         uses: actions/upload-artifact@v4
         with:
-          name: bench-${{ matrix.go-version }}
-          path: bench-${{ matrix.go-version }}.txt
+          name: npm-poindexter-wasm
+          if-no-files-found: error
+          path: npm/poindexter-wasm/**
 
-      - name: Vulncheck
-        uses: golang/govulncheck-action@v1
+      - name: Upload npm tarball
+        uses: actions/upload-artifact@v4
         with:
-          go-version-input: ${{ matrix.go-version }}
-
-      - name: Lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          args: --timeout=5m
+          name: npm-poindexter-wasm-tarball
+          if-no-files-found: error
+          path: ${{ steps.npm_pack.outputs.tarball }}

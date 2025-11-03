@@ -55,6 +55,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - WebAssembly (Browser): wasm.md
   - Examples:
       - Best Ping Peer (DHT): dht-best-ping.md
       - Multi-Dimensional KDTree (DHT): kdtree-multidimensional.md
