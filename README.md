@@ -5,6 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Snider/Poindexter)](https://goreportcard.com/report/github.com/Snider/Poindexter)
 [![Vulncheck](https://img.shields.io/badge/govulncheck-enabled-brightgreen.svg)](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck)
 [![codecov](https://codecov.io/gh/Snider/Poindexter/branch/main/graph/badge.svg)](https://codecov.io/gh/Snider/Poindexter)
+[![Release](https://img.shields.io/github/v/release/Snider/Poindexter?display_name=tag)](https://github.com/Snider/Poindexter/releases)
 
 A Go library package providing utility functions including sorting algorithms with custom comparators.
 
@@ -76,6 +77,15 @@ Explore runnable examples in the repository:
 - Insert is O(1) amortized; delete by ID is O(1) via swap-delete; order is not preserved.
 - Concurrency: the KDTree type is not safe for concurrent mutation. Protect with a mutex or share immutable snapshots for read-mostly workloads.
 - See multi-dimensional examples (ping/hops/geo/score) in docs and `examples/`.
+- Performance guide: see docs/Performance for benchmark guidance and tips: [docs/perf.md](docs/perf.md) • Hosted: https://snider.github.io/Poindexter/perf/
+
+#### Choosing a metric (quick tips)
+- Euclidean (L2): smooth trade-offs across axes; solid default for blended preferences.
+- Manhattan (L1): emphasizes per-axis absolute differences; good when each unit of ping/hop matters equally.
+- Chebyshev (L∞): dominated by the worst axis; useful for strict thresholds (e.g., reject high hop count regardless of ping).
+- Cosine: angle-based for vector similarity; pair it with normalized/weighted features when direction matters more than magnitude.
+
+See the multi-dimensional KDTree docs for end-to-end examples and weighting/normalization helpers: [Multi-Dimensional KDTree (DHT)](docs/kdtree-multidimensional.md).
 
 ## License
 

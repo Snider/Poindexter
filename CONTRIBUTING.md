@@ -51,9 +51,29 @@ Also run `go vet ./...` periodically.
 
 ## Release process
 
-Maintainers:
-- Update CHANGELOG.md.
-- Tag releases `vX.Y.Z`.
-- Consider updating docs and README badges if needed.
+We use GoReleaser to publish GitHub Releases when a semver tag is pushed.
+
+Steps for maintainers:
+- Ensure `CHANGELOG.md` has an entry for the version and links are updated at the bottom (Unreleased compares from latest tag).
+- Ensure `poindexter.Version()` returns the new version and tests pass.
+- Merge all changes to `main` and wait for CI to be green.
+- Create an annotated tag and push:
+  
+  ```bash
+  VERSION=vX.Y.Z
+  git tag -a "$VERSION" -m "Release $VERSION"
+  git push origin "$VERSION"
+  ```
+- GitHub Actions workflow `.github/workflows/release.yml` will run tests and GoReleaser to publish the Release.
+- Verify the release notes and badges (README release badge updates automatically).
+
+Optional:
+- Dry-run locally without publishing:
+  
+  ```bash
+  goreleaser release --skip=publish --clean
+  ```
+
+See `RELEASE.md` for more details.
 
 Thanks for helping improve Poindexter!

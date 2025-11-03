@@ -9,6 +9,7 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - pkg.go.dev Examples: `ExampleNewKDTreeFromDim_Insert`, `ExampleKDTree_TiesBehavior`, `ExampleKDTree_Radius_none`.
 - Lint: enable `errcheck` in `.golangci.yml` with test-file exclusion to reduce noise.
 - CI: enable module cache in `actions/setup-go` to speed up workflows.
+- Docs: README cross-link to Performance page and add a concise “Choosing a metric” tip section.
 
 ## [0.3.0] - 2025-11-03
 ### Added
@@ -25,6 +26,9 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 ### Added
 - Normalization stats helpers: `AxisStats`, `NormStats`, `ComputeNormStats2D/3D/4D`.
 - Builders that reuse stats: `Build2DWithStats`, `Build3DWithStats`, `Build4DWithStats`.
+- CI: coverage integration (`-coverprofile`), Codecov upload and badge.
+- CI: benchmark runs publish artifacts per Go version.
+- Docs: Performance page (`docs/perf.md`) and MkDocs nav entry.
 - pkg.go.dev examples: `ExampleBuild2DWithStats`, `ExampleBuild4DWithStats`.
 - Tests for stats parity, min==max safety, and dynamic update with reused stats.
 - Docs: API reference section “KDTree Normalization Stats (reuse across updates)”; updated multi-dimensional docs with WithStats snippet.
@@ -46,6 +50,7 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - KDTree public API with generic payloads and helper builders (Build2D/3D/4D).
 - Docs pages for DHT examples and multi-dimensional KDTree usage.
 
-[Unreleased]: https://github.com/Snider/Poindexter/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/Snider/Poindexter/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Snider/Poindexter/releases/tag/v0.3.0
 [0.2.1]: https://github.com/Snider/Poindexter/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Snider/Poindexter/releases/tag/v0.2.0
