@@ -42,6 +42,21 @@ jobs:
       - name: Benchmarks (linear)
         run: go test -bench . -benchmem -run=^$ ./... | tee bench-linear.txt
 
+      - name: Coverage summary (linear)
+        run: |
+          if [ -f coverage.out ]; then
+            go tool cover -func=coverage.out > coverage-summary.md;
+          else
+            echo "coverage.out not found" > coverage-summary.md;
+          fi
+
+      - name: Upload coverage summary (linear)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage-summary.md
+          if-no-files-found: error
+
       - name: Upload benchmarks (linear)
         uses: actions/upload-artifact@v4
         with:
@@ -54,6 +69,9 @@ jobs:
 
       - name: Prepare npm package folder
         run: make npm-pack
+
+      - name: WASM smoke test (Node)
+        run: node npm/poindexter-wasm/smoke.mjs
 
       - name: Create npm tarball
         id: npm_pack
@@ -135,6 +153,21 @@ jobs:
         with:
           name: coverage-gonum
           path: coverage-gonum.out
+          if-no-files-found: error
+
+      - name: Coverage summary (gonum)
+        run: |
+          if [ -f coverage-gonum.out ]; then
+            go tool cover -func=coverage-gonum.out > coverage-summary-gonum.md;
+          else
+            echo "coverage-gonum.out not found" > coverage-summary-gonum.md;
+          fi
+
+      - name: Upload coverage summary (gonum)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary-gonum
+          path: coverage-summary-gonum.md
           if-no-files-found: error
 
       - name: Upload benchmarks (gonum)

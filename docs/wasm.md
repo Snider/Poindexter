@@ -150,3 +150,22 @@ Then open:
 - http://127.0.0.1:8000/examples/wasm-browser/
 
 Open the browser console to see outputs from `nearest`, `kNearest`, and `radius` queries.
+
+### TypeScript + Vite demo (local-only)
+
+A minimal TypeScript demo using Vite is also included:
+
+- Path: `examples/wasm-browser-ts/`
+- Prerequisites: run `make wasm-build` at the repo root first.
+- From the example folder:
+
+```bash
+npm install
+npm run dev
+```
+
+Then open the URL printed by Vite (usually http://127.0.0.1:5173/) and check the browser console.
+
+Notes:
+- The dev script copies `dist/poindexter.wasm`, `dist/wasm_exec.js`, and the ESM loader into the example's `public/` folder before serving.
+- This example is intentionally excluded from CI to keep the pipeline lean.

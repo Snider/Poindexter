@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Poindexter WASM TS Demo</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; }
+      pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+  </head>
+  <body>
+    <h1>Poindexter WASM (TypeScript + Vite)</h1>
+    <p>
+      This demo initializes the WebAssembly build and performs KDTree queries. Open your browser console to see results.
+    </p>
+    <p>
+      Before running, build the WASM artifacts at the repo root:
+    </p>
+    <pre><code>make wasm-build</code></pre>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

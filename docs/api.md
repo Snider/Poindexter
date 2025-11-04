@@ -498,6 +498,53 @@ Notes:
 
 ---
 
+## KDTree Normalization Helpers (N‑D)
+
+Poindexter includes helpers to build KD points from arbitrary dimensions.
+
+```go
+func BuildND[T any](
+    items []T,
+    id func(T) string,
+    features []func(T) float64,
+    weights []float64,
+    invert []bool,
+) ([]KDPoint[T], error)
+
+// Like BuildND but never returns an error. It performs no validation beyond
+// basic length checks and propagates NaN/Inf values from feature extractors.
+func BuildNDNoErr[T any](
+    items []T,
+    id func(T) string,
+    features []func(T) float64,
+    weights []float64,
+    invert []bool,
+) []KDPoint[T]
+```
+
+- `features`: extract raw values per axis.
+- `weights`: per-axis weights, same length as `features`.
+- `invert`: if true for an axis, uses `1 - normalized` before weighting (turns “higher is better” into lower cost).
+- Use `ComputeNormStatsND` + `BuildNDWithStats` to reuse normalization between updates.
+
+Example:
+
+```go
+pts := poindexter.BuildNDNoErr(records,
+    func(r Rec) string { return r.ID },
+    []func(Rec) float64{
+        func(r Rec) float64 { return r.PingMS },
+        func(r Rec) float64 { return r.Hops },
+        func(r Rec) float64 { return r.GeoKM },
+        func(r Rec) float64 { return r.Score },
+    },
+    []float64{1.0, 0.7, 0.2, 1.2},
+    []bool{false, false, false, true},
+)
+```
+
+---
+
 ## KDTree Backend selection
 
 Poindexter provides two internal backends for KDTree queries:

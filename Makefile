@@ -117,8 +117,26 @@ fuzz: ## Run Go fuzz tests for $(FUZZTIME)
 	done
 
 .PHONY: bench
-bench: ## Run benchmarks and write $(BENCHOUT)
-	$(GO) test -bench . -benchmem -run=^$$ ./... | tee $(BENCHOUT)
+# Benchmark configuration variables
+BENCHPKG     ?= ./...
+BENCHFILTER  ?= .
+BENCHTAGS    ?=
+BENCHMEMFLAG ?= -benchmem
+
+bench: ## Run benchmarks (configurable: BENCHPKG, BENCHFILTER, BENCHTAGS, BENCHOUT)
+	$(GO) test $(if $(BENCHTAGS),-tags=$(BENCHTAGS),) -bench $(BENCHFILTER) $(BENCHMEMFLAG) -run=^$$ $(BENCHPKG) | tee $(BENCHOUT)
+
+.PHONY: bench-linear
+bench-linear: ## Run linear-backend benchmarks and write bench-linear.txt
+	$(MAKE) bench BENCHTAGS= BENCHOUT=bench-linear.txt
+
+.PHONY: bench-gonum
+bench-gonum: ## Run gonum-backend benchmarks (includes 100k benches) and write bench-gonum.txt
+	$(MAKE) bench BENCHTAGS=gonum BENCHOUT=bench-gonum.txt
+
+.PHONY: bench-list
+bench-list: ## List available benchmark names for BENCHPKG (use with BENCHPKG=./pkg)
+	$(GO) test $(if $(BENCHTAGS),-tags=$(BENCHTAGS),) -run=^$$ -bench ^$$ -list '^Benchmark' $(BENCHPKG)
 
 .PHONY: lint
 lint: ## Run golangci-lint (requires it installed)

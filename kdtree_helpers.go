@@ -88,6 +88,23 @@ func BuildND[T any](items []T, id func(T) string, features []func(T) float64, we
 	return BuildNDWithStats(items, id, features, weights, invert, stats)
 }
 
+// BuildNDNoErr constructs normalized-and-weighted KD points like BuildND but never returns an error.
+// It performs no input validation beyond basic length checks and will propagate NaN/Inf values
+// from feature extractors into the resulting coordinates. Use when you control inputs and want a
+// simpler call signature.
+func BuildNDNoErr[T any](items []T, id func(T) string, features []func(T) float64, weights []float64, invert []bool) []KDPoint[T] {
+	if len(items) == 0 || len(features) == 0 {
+		return nil
+	}
+	// If lengths are inconsistent, return empty (no panic); this function is intentionally lenient.
+	if len(weights) != len(features) || len(invert) != len(features) {
+		return nil
+	}
+	stats, _ := ComputeNormStatsND(items, features)
+	pts, _ := BuildNDWithStats(items, id, features, weights, invert, stats)
+	return pts
+}
+
 // BuildNDWithStats builds points using provided normalisation stats.
 func BuildNDWithStats[T any](items []T, id func(T) string, features []func(T) float64, weights []float64, invert []bool, stats NormStats) ([]KDPoint[T], error) {
 	if len(items) == 0 {

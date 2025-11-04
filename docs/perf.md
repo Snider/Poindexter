@@ -4,8 +4,9 @@ This page summarizes how to measure KDTree performance in this repository and ho
 
 ## How benchmarks are organized
 
-- Micro-benchmarks live in `bench_kdtree_test.go` and `bench_kdtree_dual_test.go` and cover:
-  - `Nearest` in 2D and 4D with N = 1k, 10k
+- Micro-benchmarks live in `bench_kdtree_test.go`, `bench_kdtree_dual_test.go`, and `bench_kdtree_dual_100k_test.go` and cover:
+  - `Nearest` in 2D and 4D with N = 1k, 10k (both backends)
+  - `Nearest` in 2D and 4D with N = 100k (gonum-tag job; linear also measured there)
   - `KNearest(k=10)` in 2D/4D with N = 1k, 10k
   - `Radius` (mid radius r≈0.5 after normalization) in 2D/4D with N = 1k, 10k
 - Datasets: Uniform and 3-cluster synthetic generators in normalized [0,1] spaces.
