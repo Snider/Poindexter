@@ -1,0 +1,178 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build-test-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Install extra tools
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Go env
+        run: go env
+
+      - name: CI checks (lint, tests, coverage, etc.)
+        run: make ci
+
+      - name: Benchmarks (linear)
+        run: go test -bench . -benchmem -run=^$ ./... | tee bench-linear.txt
+
+      - name: Coverage summary (linear)
+        run: |
+          if [ -f coverage.out ]; then
+            go tool cover -func=coverage.out > coverage-summary.md;
+          else
+            echo "coverage.out not found" > coverage-summary.md;
+          fi
+
+      - name: Upload coverage summary (linear)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage-summary.md
+          if-no-files-found: error
+
+      - name: Upload benchmarks (linear)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-linear
+          path: bench-linear.txt
+          if-no-files-found: error
+
+      - name: Build WebAssembly module
+        run: make wasm-build
+
+      - name: Prepare npm package folder
+        run: make npm-pack
+
+      - name: WASM smoke test (Node)
+        run: node npm/poindexter-wasm/smoke.mjs
+
+      - name: Create npm tarball
+        id: npm_pack
+        run: |
+          echo "tarball=$(npm pack ./npm/poindexter-wasm)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload dist (WASM artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: poindexter-wasm-dist
+          if-no-files-found: error
+          path: |
+            dist/poindexter.wasm
+            dist/wasm_exec.js
+
+      - name: Upload npm package folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-poindexter-wasm
+          if-no-files-found: error
+          path: npm/poindexter-wasm/**
+
+      - name: Upload npm tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-poindexter-wasm-tarball
+          if-no-files-found: error
+          path: ${{ steps.npm_pack.outputs.tarball }}
+
+  build-test-gonum:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Install extra tools
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Go env
+        run: go env
+
+      - name: Lint
+        run: golangci-lint run
+
+      - name: Build (gonum tag)
+        run: go build -tags=gonum ./...
+
+      - name: Unit tests + race + coverage (gonum tag)
+        run: go test -tags=gonum -race -coverpkg=./... -coverprofile=coverage-gonum.out -covermode=atomic ./...
+
+      - name: Fuzz (10s per fuzz test, gonum tag)
+        run: |
+          set -e
+          for pkg in $(go list ./...); do
+            FUZZES=$(go test -tags=gonum -list '^Fuzz' "$pkg" | grep '^Fuzz' || true)
+            if [ -z "$FUZZES" ]; then
+              echo "==> Skipping $pkg (no fuzz targets)"
+              continue
+            fi
+            for fz in $FUZZES; do
+              echo "==> Fuzzing $pkg :: $fz for 10s"
+              go test -tags=gonum -run=NONE -fuzz=^${fz}$ -fuzztime=10s "$pkg"
+            done
+          done
+
+      - name: Benchmarks (gonum tag)
+        run: go test -tags=gonum -bench . -benchmem -run=^$ ./... | tee bench-gonum.txt
+
+      - name: Upload coverage (gonum)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-gonum
+          path: coverage-gonum.out
+          if-no-files-found: error
+
+      - name: Coverage summary (gonum)
+        run: |
+          if [ -f coverage-gonum.out ]; then
+            go tool cover -func=coverage-gonum.out > coverage-summary-gonum.md;
+          else
+            echo "coverage-gonum.out not found" > coverage-summary-gonum.md;
+          fi
+
+      - name: Upload coverage summary (gonum)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary-gonum
+          path: coverage-summary-gonum.md
+          if-no-files-found: error
+
+      - name: Upload benchmarks (gonum)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-gonum
+          path: bench-gonum.txt
+          if-no-files-found: error

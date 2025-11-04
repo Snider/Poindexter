@@ -13,13 +13,13 @@ func Version() string
 Returns the current version of the library.
 
 **Returns:**
-- `string`: The version string (e.g., "0.1.0")
+- `string`: The version string (e.g., "0.3.0")
 
 **Example:**
 
 ```go
 version := poindexter.Version()
-fmt.Println(version) // Output: 0.1.0
+fmt.Println(version) // Output: 0.3.0
 ```
 
 ---
@@ -316,3 +316,285 @@ Performs a binary search on a sorted slice of strings.
 
 **Returns:**
 - `int`: The index where target is found, or -1 if not found
+
+
+## KDTree Helpers
+
+Poindexter provides helpers to build normalized, weighted KD points from your own records. These functions min–max normalize each axis over your dataset, optionally invert axes where higher is better (to turn them into “lower cost”), and apply per‑axis weights.
+
+```go
+func Build2D[T any](
+    items []T,
+    id func(T) string,
+    f1, f2 func(T) float64,
+    weights [2]float64,
+    invert [2]bool,
+) ([]KDPoint[T], error)
+
+func Build3D[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3 func(T) float64,
+    weights [3]float64,
+    invert [3]bool,
+) ([]KDPoint[T], error)
+
+func Build4D[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3, f4 func(T) float64,
+    weights [4]float64,
+    invert [4]bool,
+) ([]KDPoint[T], error)
+```
+
+Example (4D over ping, hops, geo, score):
+
+```go
+// weights and inversion: flip score so higher is better → lower cost
+weights := [4]float64{1.0, 0.7, 0.2, 1.2}
+invert  := [4]bool{false, false, false, true}
+
+pts, err := poindexter.Build4D(
+    peers,
+    func(p Peer) string { return p.ID },
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+    func(p Peer) float64 { return p.GeoKM },
+    func(p Peer) float64 { return p.Score },
+    weights, invert,
+)
+if err != nil { panic(err) }
+
+kdt, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.EuclideanDistance{}))
+best, dist, _ := kdt.Nearest([]float64{0, 0, 0, 0})
+```
+
+Notes:
+- Keep and reuse your normalization parameters (min/max) if you need consistency across updates; otherwise rebuild points when the candidate set changes.
+- Use `invert` to turn “higher is better” features (like scores) into lower costs for distance calculations.
+
+
+---
+
+## KDTree Constructors and Errors
+
+### NewKDTree
+
+```go
+func NewKDTree[T any](pts []KDPoint[T], opts ...KDOption) (*KDTree[T], error)
+```
+
+Build a KDTree from the provided points. All points must have the same dimensionality (> 0) and IDs (if provided) must be unique.
+
+Possible errors:
+- `ErrEmptyPoints`: no points provided
+- `ErrZeroDim`: dimension must be at least 1
+- `ErrDimMismatch`: inconsistent dimensionality among points
+- `ErrDuplicateID`: duplicate point ID encountered
+
+### NewKDTreeFromDim
+
+```go
+func NewKDTreeFromDim[T any](dim int, opts ...KDOption) (*KDTree[T], error)
+```
+
+Construct an empty KDTree with the given dimension, then populate later via `Insert`.
+
+---
+
+## KDTree Notes: Complexity, Ties, Concurrency
+
+- Complexity: current implementation uses O(n) linear scans for queries (`Nearest`, `KNearest`, `Radius`). Inserts are O(1) amortized. Deletes by ID are O(1) using swap-delete (order not preserved).
+- Tie ordering: when multiple neighbors have the same distance, ordering of ties is arbitrary and not stable between calls.
+- Concurrency: KDTree is not safe for concurrent mutation. Wrap with a mutex or share immutable snapshots for read-mostly workloads.
+
+See runnable examples in the repository `examples/` and the docs pages for 1D DHT and multi-dimensional KDTree usage.
+
+
+## KDTree Normalization Stats (reuse across updates)
+
+To keep normalization consistent across dynamic updates, compute per‑axis min/max once and reuse it to build points later. This avoids drift when the candidate set changes.
+
+### Types
+
+```go
+// AxisStats holds the min/max observed for a single axis.
+type AxisStats struct {
+    Min float64
+    Max float64
+}
+
+// NormStats holds per‑axis normalisation stats; for D dims, Stats has length D.
+type NormStats struct {
+    Stats []AxisStats
+}
+```
+
+### Compute normalization stats
+
+```go
+func ComputeNormStats2D[T any](items []T, f1, f2 func(T) float64) NormStats
+func ComputeNormStats3D[T any](items []T, f1, f2, f3 func(T) float64) NormStats
+func ComputeNormStats4D[T any](items []T, f1, f2, f3, f4 func(T) float64) NormStats
+```
+
+### Build with precomputed stats
+
+```go
+func Build2DWithStats[T any](
+    items []T,
+    id func(T) string,
+    f1, f2 func(T) float64,
+    weights [2]float64,
+    invert [2]bool,
+    stats NormStats,
+) ([]KDPoint[T], error)
+
+func Build3DWithStats[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3 func(T) float64,
+    weights [3]float64,
+    invert [3]bool,
+    stats NormStats,
+) ([]KDPoint[T], error)
+
+func Build4DWithStats[T any](
+    items []T,
+    id func(T) string,
+    f1, f2, f3, f4 func(T) float64,
+    weights [4]float64,
+    invert [4]bool,
+    stats NormStats,
+) ([]KDPoint[T], error)
+```
+
+
+#### Example (2D)
+
+```go
+// Compute stats once over your baseline set
+stats := poindexter.ComputeNormStats2D(peers,
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+)
+
+// Build points using those stats (now or later)
+pts, _ := poindexter.Build2DWithStats(
+    peers,
+    func(p Peer) string { return p.ID },
+    func(p Peer) float64 { return p.PingMS },
+    func(p Peer) float64 { return p.Hops },
+    [2]float64{1,1}, [2]bool{false,false}, stats,
+)
+```
+
+Notes:
+- If `min==max` for an axis, normalized value is `0` for that axis.
+- `invert[i]` flips the normalized axis as `1 - n` before applying `weights[i]`.
+- These helpers mirror `Build2D/3D/4D`, but use your provided `NormStats` instead of recomputing from the items slice.
+
+
+---
+
+## KDTree Normalization Helpers (N‑D)
+
+Poindexter includes helpers to build KD points from arbitrary dimensions.
+
+```go
+func BuildND[T any](
+    items []T,
+    id func(T) string,
+    features []func(T) float64,
+    weights []float64,
+    invert []bool,
+) ([]KDPoint[T], error)
+
+// Like BuildND but never returns an error. It performs no validation beyond
+// basic length checks and propagates NaN/Inf values from feature extractors.
+func BuildNDNoErr[T any](
+    items []T,
+    id func(T) string,
+    features []func(T) float64,
+    weights []float64,
+    invert []bool,
+) []KDPoint[T]
+```
+
+- `features`: extract raw values per axis.
+- `weights`: per-axis weights, same length as `features`.
+- `invert`: if true for an axis, uses `1 - normalized` before weighting (turns “higher is better” into lower cost).
+- Use `ComputeNormStatsND` + `BuildNDWithStats` to reuse normalization between updates.
+
+Example:
+
+```go
+pts := poindexter.BuildNDNoErr(records,
+    func(r Rec) string { return r.ID },
+    []func(Rec) float64{
+        func(r Rec) float64 { return r.PingMS },
+        func(r Rec) float64 { return r.Hops },
+        func(r Rec) float64 { return r.GeoKM },
+        func(r Rec) float64 { return r.Score },
+    },
+    []float64{1.0, 0.7, 0.2, 1.2},
+    []bool{false, false, false, true},
+)
+```
+
+---
+
+## KDTree Backend selection
+
+Poindexter provides two internal backends for KDTree queries:
+
+- `linear`: always available; performs O(n) scans for `Nearest`, `KNearest`, and `Radius`.
+- `gonum`: optimized KD backend compiled when you build with the `gonum` build tag; typically sub-linear on prunable datasets and modest dimensions.
+
+### Types and options
+
+```go
+// KDBackend selects the internal engine used by KDTree.
+type KDBackend string
+
+const (
+    BackendLinear KDBackend = "linear"
+    BackendGonum  KDBackend = "gonum"
+)
+
+// WithBackend selects the internal KDTree backend ("linear" or "gonum").
+// If the requested backend is unavailable (e.g., missing build tag), the constructor
+// falls back to the linear backend.
+func WithBackend(b KDBackend) KDOption
+```
+
+### Default selection
+
+- Default is `linear`.
+- If you build your project with `-tags=gonum`, the default becomes `gonum`.
+
+### Usage examples
+
+```go
+// Default metric is Euclidean; you can override with WithMetric.
+pts := []poindexter.KDPoint[string]{
+    {ID: "A", Coords: []float64{0, 0}},
+    {ID: "B", Coords: []float64{1, 0}},
+}
+
+// Force Linear (always available)
+lin, _ := poindexter.NewKDTree(pts, poindexter.WithBackend(poindexter.BackendLinear))
+_, _, _ = lin.Nearest([]float64{0.9, 0.1})
+
+// Force Gonum (requires building with: go build -tags=gonum)
+gon, _ := poindexter.NewKDTree(pts, poindexter.WithBackend(poindexter.BackendGonum))
+_, _, _ = gon.Nearest([]float64{0.9, 0.1})
+```
+
+### Supported metrics in the optimized backend
+
+- Euclidean (L2), Manhattan (L1), Chebyshev (L∞).
+- Cosine and Weighted-Cosine currently use the Linear backend.
+
+See also the Performance guide for measured comparisons and guidance: `docs/perf.md`.

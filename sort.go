@@ -39,7 +39,7 @@ func SortBy[T any](data []T, less func(i, j int) bool) {
 }
 
 // SortByKey sorts a slice by extracting a comparable key from each element.
-// The key function should return a value that implements constraints.Ordered.
+// K is restricted to int, float64, or string.
 func SortByKey[T any, K int | float64 | string](data []T, key func(T) K) {
 	sort.Slice(data, func(i, j int) bool {
 		return key(data[i]) < key(data[j])

@@ -1,0 +1,20 @@
+version: "2"
+run:
+  timeout: 5m
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - ineffassign
+    - misspell
+    - errcheck
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+linters-settings:
+  errcheck:
+    # Using default settings; test file exclusions are handled by exclude-rules above.

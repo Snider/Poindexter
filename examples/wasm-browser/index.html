@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Poindexter WASM Browser Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; }
+    pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+</head>
+<body>
+  <h1>Poindexter WASM Browser Demo</h1>
+  <p>This demo uses the ESM loader to initialize the WebAssembly build and run a simple KDTree query entirely in your browser.</p>
+
+  <p>
+    Serve this file from the repository root so the asset paths resolve. For example:
+  </p>
+  <pre><code>python3 -m http.server -b 127.0.0.1 8000</code></pre>
+  <p>Then open <code>http://127.0.0.1:8000/examples/wasm-browser/</code> in your browser.</p>
+
+  <h2>Console output</h2>
+  <p>Open DevTools console to inspect results.</p>
+
+  <script type="module">
+    // Import the ESM loader from the npm package directory within this repo.
+    // When serving from repo root, this path resolves to the local loader.
+    import { init } from '../../npm/poindexter-wasm/loader.js';
+
+    async function main() {
+      const px = await init({
+        // Point to the built WASM artifacts in dist/. Ensure you ran `make wasm-build` first.
+        wasmURL: '../../dist/poindexter.wasm',
+        wasmExecURL: '../../dist/wasm_exec.js',
+      });
+
+      console.log('Poindexter version (WASM):', await px.version());
+
+      const tree = await px.newTree(2);
+      await tree.insert({ id: 'a', coords: [0, 0], value: 'A' });
+      await tree.insert({ id: 'b', coords: [1, 0], value: 'B' });
+      await tree.insert({ id: 'c', coords: [0, 1], value: 'C' });
+
+      const nearest = await tree.nearest([0.9, 0.1]);
+      console.log('Nearest to [0.9,0.1]:', nearest);
+
+      const knn = await tree.kNearest([0.9, 0.9], 2);
+      console.log('kNN (k=2) for [0.9,0.9]:', knn);
+
+      const within = await tree.radius([0, 0], 1.1);
+      console.log('Within r=1.1 of [0,0]:', within);
+    }
+
+    main().catch(err => {
+      console.error('Demo error:', err);
+    });
+  </script>
+</body>
+</html>

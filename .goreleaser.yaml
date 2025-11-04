@@ -1,7 +1,3 @@
-# NOTE: This file is intentionally a mirror of .goreleaser.yaml.
-# Canonical configuration lives in .goreleaser.yaml; keep both in sync.
-# CI release workflow explicitly uses .goreleaser.yaml to avoid ambiguity.
-
 # GoReleaser config for Poindexter (library)
 # This configuration focuses on generating GitHub Releases with changelog notes.
 # Since Poindexter is a library (no CLI binaries), we skip building archives.

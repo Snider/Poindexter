@@ -122,4 +122,6 @@ func main() {
 ## Next Steps
 
 - Check out the [API Reference](api.md) for detailed documentation
+- Try the example: [Find the best (lowest‑ping) DHT peer](dht-best-ping.md)
+- Explore multidimensional KDTree over ping/hops/geo/score: [Multidimensional KDTree (DHT)](kdtree-multidimensional.md)
 - Read about the [License](license.md)
