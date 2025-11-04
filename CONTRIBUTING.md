@@ -4,7 +4,7 @@ Thanks for your interest in contributing! This document describes how to build, 
 
 ## Getting started
 
-- Go 1.22+ (1.23 preferred)
+- Go 1.23+
 - `git clone https://github.com/Snider/Poindexter`
 - `cd Poindexter`
 

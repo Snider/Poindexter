@@ -27,7 +27,7 @@ To assemble the npm package folder with the built artifacts:
 make npm-pack
 ```
 
-This populates `npm/poindexter-wasm/` with `dist/`, license and readme files. You can then create a tarball for local testing:
+This populates `npm/poindexter-wasm/` with `dist/`, licence and readme files. You can then create a tarball for local testing:
 
 ```bash
 npm pack ./npm/poindexter-wasm

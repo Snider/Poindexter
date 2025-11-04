@@ -101,6 +101,7 @@ func main() {
 ### Why does querying with `[0]` work?
 We use Euclidean distance in 1D, so `distance = |ping - target|`. With target `0`, minimizing the distance is equivalent to minimizing the ping itself.
 
+
 ### Extending the metric/space
 - Multi-objective: encode more routing features (lower is better) as extra dimensions, e.g. `[ping_ms, hops, queue_delay_ms]`.
 - Metric choice:
@@ -108,6 +109,7 @@ We use Euclidean distance in 1D, so `distance = |ping - target|`. With target `0
   - `ManhattanDistance` (L1): linear penalty; robust for sparsity.
   - `ChebyshevDistance` (L∞): cares about the worst dimension.
 - Normalization: when mixing units (ms, hops, km), normalize or weight dimensions so the metric reflects your priority.
+
 
 ### Notes
 - This KDTree currently uses an internal linear scan for queries. The API is stable and designed so it can be swapped to use `gonum.org/v1/gonum/spatial/kdtree` under the hood later for sub-linear queries on large datasets.

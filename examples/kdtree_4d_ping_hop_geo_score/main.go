@@ -23,7 +23,7 @@ func main() {
 	}
 	weights := [4]float64{1.0, 0.7, 0.2, 1.2}
 	invert := [4]bool{false, false, false, true}
-	pts, _ := poindexter.Build4D(
+	pts, err := poindexter.Build4D(
 		peers,
 		func(p Peer4) string { return p.ID },
 		func(p Peer4) float64 { return p.PingMS },
@@ -32,7 +32,16 @@ func main() {
 		func(p Peer4) float64 { return p.Score },
 		weights, invert,
 	)
-	tr, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.EuclideanDistance{}))
-	best, _, _ := tr.Nearest([]float64{0, weights[1] * 0.2, weights[2] * 0.3, 0})
+	if err != nil {
+		panic(err)
+	}
+	tr, err := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.EuclideanDistance{}))
+	if err != nil {
+		panic(err)
+	}
+	best, _, ok := tr.Nearest([]float64{0, weights[1] * 0.2, weights[2] * 0.3, 0})
+	if !ok {
+		panic("no nearest neighbour found")
+	}
 	fmt.Println("4D best:", best.ID)
 }

@@ -42,7 +42,8 @@ func TestExample1D(t *testing.T) {
 	if best.Value.Ping != 35 {
 		t.Fatalf("expected best ping 35ms, got %d", best.Value.Ping)
 	}
-	if d <= 0 {
-		t.Fatalf("expected positive distance, got %v", d)
+	// Distance from [0] to [35] should be 35
+	if d != 35 {
+		t.Fatalf("expected distance 35, got %v", d)
 	}
 }

@@ -246,7 +246,7 @@ func Build2DWithStats[T any](items []T, id func(T) string, f1, f2 func(T) float6
 		return nil, nil
 	}
 	if len(stats.Stats) != 2 {
-		return nil, nil
+		return nil, ErrStatsDimMismatch
 	}
 	pts := make([]KDPoint[T], len(items))
 	for i, it := range items {
@@ -317,7 +317,7 @@ func Build3DWithStats[T any](items []T, id func(T) string, f1, f2, f3 func(T) fl
 		return nil, nil
 	}
 	if len(stats.Stats) != 3 {
-		return nil, nil
+		return nil, ErrStatsDimMismatch
 	}
 	pts := make([]KDPoint[T], len(items))
 	for i, it := range items {
@@ -400,7 +400,7 @@ func Build4DWithStats[T any](items []T, id func(T) string, f1, f2, f3, f4 func(T
 		return nil, nil
 	}
 	if len(stats.Stats) != 4 {
-		return nil, nil
+		return nil, ErrStatsDimMismatch
 	}
 	pts := make([]KDPoint[T], len(items))
 	for i, it := range items {

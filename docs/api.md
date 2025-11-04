@@ -470,7 +470,9 @@ func Build4DWithStats[T any](
 ) ([]KDPoint[T], error)
 ```
 
+
 #### Example (2D)
+
 ```go
 // Compute stats once over your baseline set
 stats := poindexter.ComputeNormStats2D(peers,

@@ -237,23 +237,32 @@ func main() {
     // Initial 2‑D build (ping + hops)
     weights2 := [2]float64{1.0, 1.0}
     invert2  := [2]bool{false, false}
-    pts, _ := poindexter.Build2D(
+
+    // Compute normalization stats once over your baseline set
+    stats := poindexter.ComputeNormStats2D(
+        peers,
+        func(p Peer) float64 { return p.PingMS },
+        func(p Peer) float64 { return p.Hops },
+    )
+
+    // Build using the precomputed stats so future inserts share the same scale
+    pts, _ := poindexter.Build2DWithStats(
         peers,
         func(p Peer) string { return p.ID },
         func(p Peer) float64 { return p.PingMS },
         func(p Peer) float64 { return p.Hops },
-        weights2, invert2,
+        weights2, invert2, stats,
     )
     tree, _ := poindexter.NewKDTree(pts)
 
-    // Insert a new peer: rebuild its point using the same helper.
+    // Insert a new peer: reuse the same normalization stats to keep scale consistent
     newPeer := Peer{ID: "Z", PingMS: 12, Hops: 2}
-    addPts, _ := poindexter.Build2D(
+    addPts, _ := poindexter.Build2DWithStats(
         []Peer{newPeer},
         func(p Peer) string { return p.ID },
         func(p Peer) float64 { return p.PingMS },
         func(p Peer) float64 { return p.Hops },
-        weights2, invert2,
+        weights2, invert2, stats,
     )
     _ = tree.Insert(addPts[0])
 

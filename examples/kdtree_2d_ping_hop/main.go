@@ -21,14 +21,23 @@ func main() {
 	}
 	weights := [2]float64{1.0, 1.0}
 	invert := [2]bool{false, false}
-	pts, _ := poindexter.Build2D(
+	pts, err := poindexter.Build2D(
 		peers,
 		func(p Peer2) string { return p.ID },
 		func(p Peer2) float64 { return p.PingMS },
 		func(p Peer2) float64 { return p.Hops },
 		weights, invert,
 	)
-	tr, _ := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.ManhattanDistance{}))
-	best, _, _ := tr.Nearest([]float64{0, 0.3})
+	if err != nil {
+		panic(fmt.Sprintf("Build2D failed: %v", err))
+	}
+	tr, err := poindexter.NewKDTree(pts, poindexter.WithMetric(poindexter.ManhattanDistance{}))
+	if err != nil {
+		panic(fmt.Sprintf("NewKDTree failed: %v", err))
+	}
+	best, _, ok := tr.Nearest([]float64{0, 0.3})
+	if !ok {
+		panic("no nearest neighbour found")
+	}
 	fmt.Println("2D best:", best.ID)
 }

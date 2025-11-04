@@ -74,7 +74,8 @@ export async function init(options = {}) {
   }
 
   // Run the Go program (it registers globals like pxNewTree, etc.)
-  await go.run(result.instance);
+  // Do not await: the Go WASM main may block (e.g., via select{}), so awaiting never resolves.
+  go.run(result.instance);
 
   const api = {
     version: async () => call('pxVersion'),

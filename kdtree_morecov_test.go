@@ -48,8 +48,8 @@ func TestDeleteByID_SwapDelete(t *testing.T) {
 	if ids["B"] {
 		t.Fatalf("B should not be present after delete")
 	}
-	if !ids["A"] && !ids["C"] {
-		t.Fatalf("expected either A or C to be nearest for respective queries: %v", ids)
+	if !ids["A"] || !ids["C"] {
+		t.Fatalf("expected both A and C to be found after deleting B, got: %v", ids)
 	}
 }
 

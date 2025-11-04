@@ -17,5 +17,4 @@ issues:
         - errcheck
 linters-settings:
   errcheck:
-    # Be pragmatic: don't require checking of Close for defer patterns in tests/examples.
-    # (Keep defaults; exclusions above handle test files.)
+    # Using default settings; test file exclusions are handled by exclude-rules above.

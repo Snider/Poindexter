@@ -16,7 +16,7 @@ Run them locally:
 go test -bench . -benchmem -run=^$ ./...
 ```
 
-GitHub Actions publishes benchmark artifacts for Go 1.22 and 1.23 on every push/PR. Look for artifacts named `bench-<go-version>.txt` in the CI run.
+GitHub Actions publishes benchmark artifacts for Go 1.23 on every push/PR. Look for artifacts named `bench-<go-version>.txt` in the CI run.
 
 ## What to expect (rule of thumb)
 

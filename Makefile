@@ -147,3 +147,7 @@ docs-serve: ## Serve MkDocs locally (requires mkdocs-material)
 .PHONY: docs-build
 docs-build: ## Build MkDocs site into site/
 	$(MKDOCS) build
+
+.PHONY: clean
+clean: ## Remove generated files and directories
+	rm -rf $(DIST_DIR) $(COVEROUT) $(COVERHTML) $(BENCHOUT)
