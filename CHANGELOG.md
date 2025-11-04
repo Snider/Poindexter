@@ -6,6 +6,12 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ## [Unreleased]
 ### Added
+- Dual-backend benchmarks (Linear vs Gonum) with deterministic datasets (uniform/clustered) in 2D/4D for N=1k/10k; artifacts uploaded in CI as `bench-linear.txt` and `bench-gonum.txt`.
+- Documentation: Performance guide updated to cover backend selection, how to run both backends, CI artifact links, and guidance on when each backend is preferred.
+- Documentation: Performance guide now includes a Sample results table sourced from a recent local run.
+- Documentation: README gained a “Backend selection” section with default behavior, build tag usage, overrides, and supported metrics notes.
+- Documentation: API reference (`docs/api.md`) now documents `KDBackend`, `WithBackend`, default selection, and supported metrics for the optimized backend.
+- Examples: Added `examples/wasm-browser/` minimal browser demo (ESM + HTML) for the WASM build.
 - pkg.go.dev Examples: `ExampleNewKDTreeFromDim_Insert`, `ExampleKDTree_TiesBehavior`, `ExampleKDTree_Radius_none`.
 - Lint: enable `errcheck` in `.golangci.yml` with test-file exclusion to reduce noise.
 - CI: enable module cache in `actions/setup-go` to speed up workflows.

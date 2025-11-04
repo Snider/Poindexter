@@ -494,3 +494,60 @@ Notes:
 - If `min==max` for an axis, normalized value is `0` for that axis.
 - `invert[i]` flips the normalized axis as `1 - n` before applying `weights[i]`.
 - These helpers mirror `Build2D/3D/4D`, but use your provided `NormStats` instead of recomputing from the items slice.
+
+
+---
+
+## KDTree Backend selection
+
+Poindexter provides two internal backends for KDTree queries:
+
+- `linear`: always available; performs O(n) scans for `Nearest`, `KNearest`, and `Radius`.
+- `gonum`: optimized KD backend compiled when you build with the `gonum` build tag; typically sub-linear on prunable datasets and modest dimensions.
+
+### Types and options
+
+```go
+// KDBackend selects the internal engine used by KDTree.
+type KDBackend string
+
+const (
+    BackendLinear KDBackend = "linear"
+    BackendGonum  KDBackend = "gonum"
+)
+
+// WithBackend selects the internal KDTree backend ("linear" or "gonum").
+// If the requested backend is unavailable (e.g., missing build tag), the constructor
+// falls back to the linear backend.
+func WithBackend(b KDBackend) KDOption
+```
+
+### Default selection
+
+- Default is `linear`.
+- If you build your project with `-tags=gonum`, the default becomes `gonum`.
+
+### Usage examples
+
+```go
+// Default metric is Euclidean; you can override with WithMetric.
+pts := []poindexter.KDPoint[string]{
+    {ID: "A", Coords: []float64{0, 0}},
+    {ID: "B", Coords: []float64{1, 0}},
+}
+
+// Force Linear (always available)
+lin, _ := poindexter.NewKDTree(pts, poindexter.WithBackend(poindexter.BackendLinear))
+_, _, _ = lin.Nearest([]float64{0.9, 0.1})
+
+// Force Gonum (requires building with: go build -tags=gonum)
+gon, _ := poindexter.NewKDTree(pts, poindexter.WithBackend(poindexter.BackendGonum))
+_, _, _ = gon.Nearest([]float64{0.9, 0.1})
+```
+
+### Supported metrics in the optimized backend
+
+- Euclidean (L2), Manhattan (L1), Chebyshev (L∞).
+- Cosine and Weighted-Cosine currently use the Linear backend.
+
+See also the Performance guide for measured comparisons and guidance: `docs/perf.md`.

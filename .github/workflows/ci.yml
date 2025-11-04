@@ -39,6 +39,16 @@ jobs:
       - name: CI checks (lint, tests, coverage, etc.)
         run: make ci
 
+      - name: Benchmarks (linear)
+        run: go test -bench . -benchmem -run=^$ ./... | tee bench-linear.txt
+
+      - name: Upload benchmarks (linear)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-linear
+          path: bench-linear.txt
+          if-no-files-found: error
+
       - name: Build WebAssembly module
         run: make wasm-build
 
@@ -72,3 +82,64 @@ jobs:
           name: npm-poindexter-wasm-tarball
           if-no-files-found: error
           path: ${{ steps.npm_pack.outputs.tarball }}
+
+  build-test-gonum:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Install extra tools
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Go env
+        run: go env
+
+      - name: Lint
+        run: golangci-lint run
+
+      - name: Build (gonum tag)
+        run: go build -tags=gonum ./...
+
+      - name: Unit tests + race + coverage (gonum tag)
+        run: go test -tags=gonum -race -coverpkg=./... -coverprofile=coverage-gonum.out -covermode=atomic ./...
+
+      - name: Fuzz (10s per fuzz test, gonum tag)
+        run: |
+          set -e
+          for pkg in $(go list ./...); do
+            FUZZES=$(go test -tags=gonum -list '^Fuzz' "$pkg" | grep '^Fuzz' || true)
+            if [ -z "$FUZZES" ]; then
+              echo "==> Skipping $pkg (no fuzz targets)"
+              continue
+            fi
+            for fz in $FUZZES; do
+              echo "==> Fuzzing $pkg :: $fz for 10s"
+              go test -tags=gonum -run=NONE -fuzz=^${fz}$ -fuzztime=10s "$pkg"
+            done
+          done
+
+      - name: Benchmarks (gonum tag)
+        run: go test -tags=gonum -bench . -benchmem -run=^$ ./... | tee bench-gonum.txt
+
+      - name: Upload coverage (gonum)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-gonum
+          path: coverage-gonum.out
+          if-no-files-found: error
+
+      - name: Upload benchmarks (gonum)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-gonum
+          path: bench-gonum.txt
+          if-no-files-found: error

@@ -15,6 +15,8 @@ var (
 	ErrDimMismatch = errors.New("kdtree: inconsistent dimensionality in points")
 	// ErrDuplicateID indicates a duplicate point ID was encountered.
 	ErrDuplicateID = errors.New("kdtree: duplicate point ID")
+	// ErrBackendUnavailable indicates that a requested backend cannot be used (e.g., not built/tagged).
+	ErrBackendUnavailable = errors.New("kdtree: requested backend unavailable")
 )
 
 // KDPoint represents a point with coordinates and an attached payload/value.
@@ -170,11 +172,35 @@ func (wcd WeightedCosineDistance) Distance(a, b []float64) float64 {
 type KDOption func(*kdOptions)
 
 type kdOptions struct {
-	metric DistanceMetric
+	metric  DistanceMetric
+	backend KDBackend
 }
+
+// defaultBackend returns the implicit backend depending on build tags.
+// If built with the "gonum" tag, prefer the Gonum backend by default to keep
+// code paths simple and performant; otherwise fall back to the linear backend.
+func defaultBackend() KDBackend {
+	if hasGonum() {
+		return BackendGonum
+	}
+	return BackendLinear
+}
+
+// KDBackend selects the internal engine used by KDTree.
+type KDBackend string
+
+const (
+	BackendLinear KDBackend = "linear"
+	BackendGonum  KDBackend = "gonum"
+)
 
 // WithMetric sets the distance metric for the KDTree.
 func WithMetric(m DistanceMetric) KDOption { return func(o *kdOptions) { o.metric = m } }
+
+// WithBackend selects the internal KDTree backend ("linear" or "gonum").
+// Default is linear. If the requested backend is unavailable (e.g., gonum build tag not enabled),
+// the constructor will silently fall back to the linear backend.
+func WithBackend(b KDBackend) KDOption { return func(o *kdOptions) { o.backend = b } }
 
 // KDTree is a lightweight wrapper providing nearest-neighbor operations.
 //
@@ -186,10 +212,12 @@ func WithMetric(m DistanceMetric) KDOption { return func(o *kdOptions) { o.metri
 // This type is designed to be easily swappable with gonum.org/v1/gonum/spatial/kdtree
 // in the future without breaking the public API.
 type KDTree[T any] struct {
-	points  []KDPoint[T]
-	dim     int
-	metric  DistanceMetric
-	idIndex map[string]int
+	points      []KDPoint[T]
+	dim         int
+	metric      DistanceMetric
+	idIndex     map[string]int
+	backend     KDBackend
+	backendData any // opaque handle for backend-specific structures (e.g., gonum tree)
 }
 
 // NewKDTree builds a KDTree from the given points.
@@ -214,15 +242,29 @@ func NewKDTree[T any](pts []KDPoint[T], opts ...KDOption) (*KDTree[T], error) {
 			idIndex[p.ID] = i
 		}
 	}
-	cfg := kdOptions{metric: EuclideanDistance{}}
+	cfg := kdOptions{metric: EuclideanDistance{}, backend: defaultBackend()}
 	for _, o := range opts {
 		o(&cfg)
 	}
+	backend := cfg.backend
+	var backendData any
+	// Attempt to build gonum backend if requested and available.
+	if backend == BackendGonum && hasGonum() {
+		if bd, err := buildGonumBackend(pts, cfg.metric); err == nil {
+			backendData = bd
+		} else {
+			backend = BackendLinear // fallback gracefully
+		}
+	} else if backend == BackendGonum && !hasGonum() {
+		backend = BackendLinear // tag not enabled → fallback
+	}
 	t := &KDTree[T]{
-		points:  append([]KDPoint[T](nil), pts...),
-		dim:     dim,
-		metric:  cfg.metric,
-		idIndex: idIndex,
+		points:      append([]KDPoint[T](nil), pts...),
+		dim:         dim,
+		metric:      cfg.metric,
+		idIndex:     idIndex,
+		backend:     backend,
+		backendData: backendData,
 	}
 	return t, nil
 }
@@ -233,15 +275,21 @@ func NewKDTreeFromDim[T any](dim int, opts ...KDOption) (*KDTree[T], error) {
 	if dim <= 0 {
 		return nil, ErrZeroDim
 	}
-	cfg := kdOptions{metric: EuclideanDistance{}}
+	cfg := kdOptions{metric: EuclideanDistance{}, backend: defaultBackend()}
 	for _, o := range opts {
 		o(&cfg)
 	}
+	backend := cfg.backend
+	if backend == BackendGonum && !hasGonum() {
+		backend = BackendLinear
+	}
 	return &KDTree[T]{
-		points:  nil,
-		dim:     dim,
-		metric:  cfg.metric,
-		idIndex: make(map[string]int),
+		points:      nil,
+		dim:         dim,
+		metric:      cfg.metric,
+		idIndex:     make(map[string]int),
+		backend:     backend,
+		backendData: nil,
 	}, nil
 }
 
@@ -256,6 +304,13 @@ func (t *KDTree[T]) Len() int { return len(t.points) }
 func (t *KDTree[T]) Nearest(query []float64) (KDPoint[T], float64, bool) {
 	if len(query) != t.dim || t.Len() == 0 {
 		return KDPoint[T]{}, 0, false
+	}
+	// Gonum backend (if available and built)
+	if t.backend == BackendGonum && t.backendData != nil {
+		if idx, dist, ok := gonumNearest[T](t.backendData, query); ok && idx >= 0 && idx < len(t.points) {
+			return t.points[idx], dist, true
+		}
+		// fall through to linear scan if backend didn’t return a result
 	}
 	bestIdx := -1
 	bestDist := math.MaxFloat64
@@ -277,6 +332,18 @@ func (t *KDTree[T]) Nearest(query []float64) (KDPoint[T], float64, bool) {
 func (t *KDTree[T]) KNearest(query []float64, k int) ([]KDPoint[T], []float64) {
 	if k <= 0 || len(query) != t.dim || t.Len() == 0 {
 		return nil, nil
+	}
+	// Gonum backend path
+	if t.backend == BackendGonum && t.backendData != nil {
+		idxs, dists := gonumKNearest[T](t.backendData, query, k)
+		if len(idxs) > 0 {
+			neighbors := make([]KDPoint[T], len(idxs))
+			for i := range idxs {
+				neighbors[i] = t.points[idxs[i]]
+			}
+			return neighbors, dists
+		}
+		// fall back on unexpected empty
 	}
 	tmp := make([]struct {
 		idx  int
@@ -303,6 +370,18 @@ func (t *KDTree[T]) KNearest(query []float64, k int) ([]KDPoint[T], []float64) {
 func (t *KDTree[T]) Radius(query []float64, r float64) ([]KDPoint[T], []float64) {
 	if r < 0 || len(query) != t.dim || t.Len() == 0 {
 		return nil, nil
+	}
+	// Gonum backend path
+	if t.backend == BackendGonum && t.backendData != nil {
+		idxs, dists := gonumRadius[T](t.backendData, query, r)
+		if len(idxs) > 0 {
+			neighbors := make([]KDPoint[T], len(idxs))
+			for i := range idxs {
+				neighbors[i] = t.points[idxs[i]]
+			}
+			return neighbors, dists
+		}
+		// fall back if no results
 	}
 	var sel []struct {
 		idx  int
@@ -342,6 +421,16 @@ func (t *KDTree[T]) Insert(p KDPoint[T]) bool {
 	if p.ID != "" {
 		t.idIndex[p.ID] = len(t.points) - 1
 	}
+	// Rebuild backend if using Gonum
+	if t.backend == BackendGonum && hasGonum() {
+		if bd, err := buildGonumBackend(t.points, t.metric); err == nil {
+			t.backendData = bd
+		} else {
+			// fallback to linear if rebuild fails
+			t.backend = BackendLinear
+			t.backendData = nil
+		}
+	}
 	return true
 }
 
@@ -362,5 +451,15 @@ func (t *KDTree[T]) DeleteByID(id string) bool {
 	}
 	t.points = t.points[:last]
 	delete(t.idIndex, id)
+	// Rebuild backend if using Gonum
+	if t.backend == BackendGonum && hasGonum() {
+		if bd, err := buildGonumBackend(t.points, t.metric); err == nil {
+			t.backendData = bd
+		} else {
+			// fallback to linear if rebuild fails
+			t.backend = BackendLinear
+			t.backendData = nil
+		}
+	}
 	return true
 }

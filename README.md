@@ -71,13 +71,31 @@ Explore runnable examples in the repository:
 - examples/kdtree_2d_ping_hop
 - examples/kdtree_3d_ping_hop_geo
 - examples/kdtree_4d_ping_hop_geo_score
+- examples/wasm-browser (browser demo using the ESM loader)
 
 ### KDTree performance and notes
-- Current KDTree queries are O(n) linear scans, which are great for small-to-medium datasets or low-latency prototyping. For 1e5+ points and low/medium dimensions, consider swapping the internal engine to `gonum.org/v1/gonum/spatial/kdtree` (the API here is compatible by design).
+- Dual backend support: Linear (always available) and an optimized KD backend enabled when building with `-tags=gonum`. Linear is the default; with the `gonum` tag, the optimized backend becomes the default.
+- Complexity: Linear backend is O(n) per query. Optimized KD backend is typically sub-linear on prunable datasets and dims ≤ ~8, especially as N grows (≥10k–100k).
 - Insert is O(1) amortized; delete by ID is O(1) via swap-delete; order is not preserved.
 - Concurrency: the KDTree type is not safe for concurrent mutation. Protect with a mutex or share immutable snapshots for read-mostly workloads.
 - See multi-dimensional examples (ping/hops/geo/score) in docs and `examples/`.
 - Performance guide: see docs/Performance for benchmark guidance and tips: [docs/perf.md](docs/perf.md) • Hosted: https://snider.github.io/Poindexter/perf/
+
+### Backend selection
+- Default backend is Linear. If you build with `-tags=gonum`, the default becomes the optimized KD backend.
+- You can override per tree at construction:
+
+```go
+// Force Linear (always available)
+kdt1, _ := poindexter.NewKDTree(pts, poindexter.WithBackend(poindexter.BackendLinear))
+
+// Force Gonum (requires build tag)
+kdt2, _ := poindexter.NewKDTree(pts, poindexter.WithBackend(poindexter.BackendGonum))
+```
+
+- Supported metrics in the optimized backend: Euclidean (L2), Manhattan (L1), Chebyshev (L∞).
+- Cosine and Weighted-Cosine currently run on the Linear backend.
+- See the Performance guide for measured comparisons and when to choose which backend.
 
 #### Choosing a metric (quick tips)
 - Euclidean (L2): smooth trade-offs across axes; solid default for blended preferences.

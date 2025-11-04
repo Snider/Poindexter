@@ -9,6 +9,36 @@ Poindexter ships a browser build compiled to WebAssembly along with a small JS l
 - `npm/poindexter-wasm/loader.js` — ESM loader that instantiates the WASM and exposes a friendly API
 - `npm/poindexter-wasm/index.d.ts` — TypeScript typings for the loader and KD‑Tree API
 
+## Quick start
+
+- Build artifacts and copy `wasm_exec.js`:
+
+```bash
+make wasm-build
+```
+
+- Prepare the npm package folder with `dist/` and docs:
+
+```bash
+make npm-pack
+```
+
+- Minimal browser ESM usage (serve `dist/` statically):
+
+```html
+<script type="module">
+  import { init } from '/npm/poindexter-wasm/loader.js';
+  const px = await init({
+    wasmURL: '/dist/poindexter.wasm',
+    wasmExecURL: '/dist/wasm_exec.js',
+  });
+  const tree = await px.newTree(2);
+  await tree.insert({ id: 'a', coords: [0, 0], value: 'A' });
+  const nn = await tree.nearest([0.1, 0.2]);
+  console.log(nn);
+</script>
+```
+
 ## Building locally
 
 ```bash
@@ -102,3 +132,21 @@ Our CI builds and uploads the following artifacts on each push/PR:
 - `npm-poindexter-wasm-tarball` — a `.tgz` created via `npm pack` for quick local install/testing
 
 You can download these artifacts from the workflow run summary in GitHub Actions.
+
+## Browser demo (checked into repo)
+
+There is a tiny browser demo you can load locally from this repo:
+
+- Path: `examples/wasm-browser/index.html`
+- Prerequisites: run `make wasm-build` so `dist/poindexter.wasm` and `dist/wasm_exec.js` exist.
+- Serve the repo root (so relative paths resolve), for example:
+
+```bash
+python3 -m http.server -b 127.0.0.1 8000
+```
+
+Then open:
+
+- http://127.0.0.1:8000/examples/wasm-browser/
+
+Open the browser console to see outputs from `nearest`, `kNearest`, and `radius` queries.
