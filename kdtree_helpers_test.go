@@ -223,3 +223,61 @@ func TestBuild4DWithStats_DynamicUpdateExample(t *testing.T) {
 		t.Fatalf("dim != 4")
 	}
 }
+
+func TestComputeNormStats3D(t *testing.T) {
+	type rec struct{ x, y, z float64 }
+	items := []rec{{1, 10, 100}, {2, 20, 200}, {3, 30, 300}}
+	stats := ComputeNormStats3D(items,
+		func(r rec) float64 { return r.x },
+		func(r rec) float64 { return r.y },
+		func(r rec) float64 { return r.z },
+	)
+	expected := NormStats{
+		Stats: []AxisStats{
+			{Min: 1, Max: 3},
+			{Min: 10, Max: 30},
+			{Min: 100, Max: 300},
+		},
+	}
+	if stats.Stats[0] != expected.Stats[0] || stats.Stats[1] != expected.Stats[1] || stats.Stats[2] != expected.Stats[2] {
+		t.Fatalf("expected %v, got %v", expected, stats)
+	}
+}
+
+func TestBuildND(t *testing.T) {
+	type rec struct{ a, b, c float64 }
+	items := []rec{{1, 2, 3}, {4, 5, 6}}
+	extractors := []func(rec) float64{
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+		func(r rec) float64 { return r.c },
+	}
+	weights := []float64{1, 1, 1}
+	invert := []bool{false, false, false}
+	pts, err := BuildND(items, func(r rec) string { return "" }, extractors, weights, invert)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pts) != 2 {
+		t.Fatalf("expected 2 points, got %d", len(pts))
+	}
+	if len(pts[0].Coords) != 3 {
+		t.Fatalf("expected 3 dimensions, got %d", len(pts[0].Coords))
+	}
+}
+
+func TestBuildNDError(t *testing.T) {
+	type rec struct{ a, b, c float64 }
+	items := []rec{{1, 2, 3}, {4, 5, 6}}
+	extractors := []func(rec) float64{
+		func(r rec) float64 { return r.a },
+		func(r rec) float64 { return r.b },
+		func(r rec) float64 { return r.c },
+	}
+	weights := []float64{1, 1} // Mismatched length
+	invert := []bool{false, false, false}
+	_, err := BuildND(items, func(r rec) string { return "" }, extractors, weights, invert)
+	if err == nil {
+		t.Fatal("expected an error, but got nil")
+	}
+}
