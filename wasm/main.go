@@ -151,11 +151,12 @@ func nearest(_ js.Value, args []js.Value) (any, error) {
 		return nil, fmt.Errorf("unknown treeId %d", id)
 	}
 	p, d, found := t.Nearest(query)
-	out := map[string]any{
-		"point": map[string]any{"id": p.ID, "coords": p.Coords, "value": p.Value},
-		"dist":  d,
-		"found": found,
+	if !found {
+		return map[string]any{"found": false}, nil
 	}
+	out := kdPointToJS(p)
+	out["dist"] = d
+	out["found"] = true
 	return out, nil
 }
 
@@ -177,9 +178,13 @@ func kNearest(_ js.Value, args []js.Value) (any, error) {
 	pts, dists := t.KNearest(query, k)
 	jsPts := make([]any, len(pts))
 	for i, p := range pts {
-		jsPts[i] = map[string]any{"id": p.ID, "coords": p.Coords, "value": p.Value}
+		jsPts[i] = kdPointToJS(p)
 	}
-	return map[string]any{"points": jsPts, "dists": dists}, nil
+	jsDists := make([]any, len(dists))
+	for i, d := range dists {
+		jsDists[i] = d
+	}
+	return map[string]any{"points": jsPts, "dists": jsDists}, nil
 }
 
 func radius(_ js.Value, args []js.Value) (any, error) {
@@ -200,9 +205,13 @@ func radius(_ js.Value, args []js.Value) (any, error) {
 	pts, dists := t.Radius(query, r)
 	jsPts := make([]any, len(pts))
 	for i, p := range pts {
-		jsPts[i] = map[string]any{"id": p.ID, "coords": p.Coords, "value": p.Value}
+		jsPts[i] = kdPointToJS(p)
 	}
-	return map[string]any{"points": jsPts, "dists": dists}, nil
+	jsDists := make([]any, len(dists))
+	for i, d := range dists {
+		jsDists[i] = d
+	}
+	return map[string]any{"points": jsPts, "dists": jsDists}, nil
 }
 
 func exportJSON(_ js.Value, args []js.Value) (any, error) {
@@ -221,6 +230,14 @@ func exportJSON(_ js.Value, args []js.Value) (any, error) {
 	m := map[string]any{"dim": t.Dim(), "len": t.Len()}
 	b, _ := json.Marshal(m)
 	return string(b), nil
+}
+
+func kdPointToJS(p pd.KDPoint[string]) map[string]any {
+	coords := make([]any, len(p.Coords))
+	for i, v := range p.Coords {
+		coords[i] = v
+	}
+	return map[string]any{"id": p.ID, "coords": coords, "value": p.Value}
 }
 
 func main() {
