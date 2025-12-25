@@ -109,7 +109,9 @@ export async function init(options = {}) {
     buildRDAPDomainURL: async (domain) => call('pxBuildRDAPDomainURL', domain),
     buildRDAPIPURL: async (ip) => call('pxBuildRDAPIPURL', ip),
     buildRDAPASNURL: async (asn) => call('pxBuildRDAPASNURL', asn),
-    getDNSRecordTypes: async () => call('pxGetDNSRecordTypes')
+    getDNSRecordTypes: async () => call('pxGetDNSRecordTypes'),
+    getDNSRecordTypeInfo: async () => call('pxGetDNSRecordTypeInfo'),
+    getCommonDNSRecordTypes: async () => call('pxGetCommonDNSRecordTypes')
   };
 
   return api;

@@ -193,8 +193,118 @@ export interface InitOptions {
 // DNS Tools Types
 // ============================================================================
 
-/** DNS record types */
-export type DNSRecordType = 'A' | 'AAAA' | 'MX' | 'TXT' | 'NS' | 'CNAME' | 'SOA' | 'PTR' | 'SRV' | 'CAA';
+/** DNS record types - standard and extended (ClouDNS compatible) */
+export type DNSRecordType =
+  // Standard record types
+  | 'A'
+  | 'AAAA'
+  | 'MX'
+  | 'TXT'
+  | 'NS'
+  | 'CNAME'
+  | 'SOA'
+  | 'PTR'
+  | 'SRV'
+  | 'CAA'
+  // Additional record types (ClouDNS and others)
+  | 'ALIAS'   // Virtual A record - CNAME-like for apex domain
+  | 'RP'      // Responsible Person
+  | 'SSHFP'   // SSH Fingerprint
+  | 'TLSA'    // DANE TLS Authentication
+  | 'DS'      // DNSSEC Delegation Signer
+  | 'DNSKEY'  // DNSSEC Key
+  | 'NAPTR'   // Naming Authority Pointer
+  | 'LOC'     // Geographic Location
+  | 'HINFO'   // Host Information
+  | 'CERT'    // Certificate record
+  | 'SMIMEA'  // S/MIME Certificate Association
+  | 'WR'      // Web Redirect (ClouDNS specific)
+  | 'SPF';    // Sender Policy Framework (legacy)
+
+/** DNS record type metadata */
+export interface DNSRecordTypeInfo {
+  type: DNSRecordType;
+  name: string;
+  description: string;
+  rfc?: string;
+  common: boolean;
+}
+
+/** CAA record */
+export interface CAARecord {
+  flag: number;
+  tag: string;  // "issue", "issuewild", "iodef"
+  value: string;
+}
+
+/** SSHFP record */
+export interface SSHFPRecord {
+  algorithm: number;   // 1=RSA, 2=DSA, 3=ECDSA, 4=Ed25519
+  fpType: number;      // 1=SHA-1, 2=SHA-256
+  fingerprint: string;
+}
+
+/** TLSA (DANE) record */
+export interface TLSARecord {
+  usage: number;        // 0-3: CA constraint, Service cert, Trust anchor, Domain-issued
+  selector: number;     // 0=Full cert, 1=SubjectPublicKeyInfo
+  matchingType: number; // 0=Exact, 1=SHA-256, 2=SHA-512
+  certData: string;
+}
+
+/** DS (DNSSEC Delegation Signer) record */
+export interface DSRecord {
+  keyTag: number;
+  algorithm: number;
+  digestType: number;
+  digest: string;
+}
+
+/** DNSKEY record */
+export interface DNSKEYRecord {
+  flags: number;
+  protocol: number;
+  algorithm: number;
+  publicKey: string;
+}
+
+/** NAPTR record */
+export interface NAPTRRecord {
+  order: number;
+  preference: number;
+  flags: string;
+  service: string;
+  regexp: string;
+  replacement: string;
+}
+
+/** RP (Responsible Person) record */
+export interface RPRecord {
+  mailbox: string;  // Email as DNS name (user.domain.com)
+  txtDom: string;   // Domain with TXT record containing more info
+}
+
+/** LOC (Location) record */
+export interface LOCRecord {
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  size: number;
+  hPrecision: number;
+  vPrecision: number;
+}
+
+/** ALIAS record (provider-specific) */
+export interface ALIASRecord {
+  target: string;
+}
+
+/** Web Redirect record (ClouDNS specific) */
+export interface WebRedirectRecord {
+  url: string;
+  redirectType: number;  // 301, 302, etc.
+  frame: boolean;        // Frame redirect vs HTTP redirect
+}
 
 /** External tool links for domain/IP/email analysis */
 export interface ExternalToolLinks {
@@ -429,6 +539,8 @@ export interface PxAPI {
   buildRDAPIPURL(ip: string): Promise<string>;
   buildRDAPASNURL(asn: string): Promise<string>;
   getDNSRecordTypes(): Promise<DNSRecordType[]>;
+  getDNSRecordTypeInfo(): Promise<DNSRecordTypeInfo[]>;
+  getCommonDNSRecordTypes(): Promise<DNSRecordType[]>;
 }
 
 export function init(options?: InitOptions): Promise<PxAPI>;

@@ -664,10 +664,39 @@ func buildRDAPASNURL(_ js.Value, args []js.Value) (any, error) {
 }
 
 func getDNSRecordTypes(_ js.Value, _ []js.Value) (any, error) {
-	// Returns available DNS record types
-	return []string{
-		"A", "AAAA", "MX", "TXT", "NS", "CNAME", "SOA", "PTR", "SRV", "CAA",
-	}, nil
+	// Returns all available DNS record types
+	types := pd.GetAllDNSRecordTypes()
+	result := make([]string, len(types))
+	for i, t := range types {
+		result[i] = string(t)
+	}
+	return result, nil
+}
+
+func getDNSRecordTypeInfo(_ js.Value, _ []js.Value) (any, error) {
+	// Returns detailed info about all DNS record types
+	info := pd.GetDNSRecordTypeInfo()
+	result := make([]any, len(info))
+	for i, r := range info {
+		result[i] = map[string]any{
+			"type":        string(r.Type),
+			"name":        r.Name,
+			"description": r.Description,
+			"rfc":         r.RFC,
+			"common":      r.Common,
+		}
+	}
+	return result, nil
+}
+
+func getCommonDNSRecordTypes(_ js.Value, _ []js.Value) (any, error) {
+	// Returns only commonly used DNS record types
+	types := pd.GetCommonDNSRecordTypes()
+	result := make([]string, len(types))
+	for i, t := range types {
+		result[i] = string(t)
+	}
+	return result, nil
 }
 
 func main() {
@@ -709,6 +738,8 @@ func main() {
 	export("pxBuildRDAPIPURL", buildRDAPIPURL)
 	export("pxBuildRDAPASNURL", buildRDAPASNURL)
 	export("pxGetDNSRecordTypes", getDNSRecordTypes)
+	export("pxGetDNSRecordTypeInfo", getDNSRecordTypeInfo)
+	export("pxGetCommonDNSRecordTypes", getCommonDNSRecordTypes)
 
 	// Keep running
 	select {}

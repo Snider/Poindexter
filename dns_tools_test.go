@@ -156,6 +156,136 @@ func TestDNSRecordTypes(t *testing.T) {
 	}
 }
 
+func TestDNSRecordTypesExtended(t *testing.T) {
+	// Test all ClouDNS record types are defined
+	types := []DNSRecordType{
+		DNSRecordALIAS,
+		DNSRecordRP,
+		DNSRecordSSHFP,
+		DNSRecordTLSA,
+		DNSRecordDS,
+		DNSRecordDNSKEY,
+		DNSRecordNAPTR,
+		DNSRecordLOC,
+		DNSRecordHINFO,
+		DNSRecordCERT,
+		DNSRecordSMIMEA,
+		DNSRecordWR,
+		DNSRecordSPF,
+	}
+
+	expected := []string{"ALIAS", "RP", "SSHFP", "TLSA", "DS", "DNSKEY", "NAPTR", "LOC", "HINFO", "CERT", "SMIMEA", "WR", "SPF"}
+
+	for i, typ := range types {
+		if string(typ) != expected[i] {
+			t.Errorf("expected type %s, got %s", expected[i], typ)
+		}
+	}
+}
+
+func TestGetDNSRecordTypeInfo(t *testing.T) {
+	info := GetDNSRecordTypeInfo()
+
+	if len(info) == 0 {
+		t.Error("GetDNSRecordTypeInfo should return non-empty list")
+	}
+
+	// Check that common types exist
+	commonFound := 0
+	for _, r := range info {
+		if r.Common {
+			commonFound++
+		}
+		// Each entry should have type, name, and description
+		if r.Type == "" {
+			t.Error("Record type should not be empty")
+		}
+		if r.Name == "" {
+			t.Error("Record name should not be empty")
+		}
+		if r.Description == "" {
+			t.Error("Record description should not be empty")
+		}
+	}
+
+	if commonFound < 10 {
+		t.Errorf("Expected at least 10 common record types, got %d", commonFound)
+	}
+
+	// Check for specific types
+	typeMap := make(map[DNSRecordType]DNSRecordTypeInfo)
+	for _, r := range info {
+		typeMap[r.Type] = r
+	}
+
+	if _, ok := typeMap[DNSRecordA]; !ok {
+		t.Error("A record type should be in info")
+	}
+	if _, ok := typeMap[DNSRecordALIAS]; !ok {
+		t.Error("ALIAS record type should be in info")
+	}
+	if _, ok := typeMap[DNSRecordTLSA]; !ok {
+		t.Error("TLSA record type should be in info")
+	}
+	if _, ok := typeMap[DNSRecordWR]; !ok {
+		t.Error("WR (Web Redirect) record type should be in info")
+	}
+}
+
+func TestGetCommonDNSRecordTypes(t *testing.T) {
+	types := GetCommonDNSRecordTypes()
+
+	if len(types) == 0 {
+		t.Error("GetCommonDNSRecordTypes should return non-empty list")
+	}
+
+	// Check that standard types are present
+	typeSet := make(map[DNSRecordType]bool)
+	for _, typ := range types {
+		typeSet[typ] = true
+	}
+
+	if !typeSet[DNSRecordA] {
+		t.Error("A record should be in common types")
+	}
+	if !typeSet[DNSRecordAAAA] {
+		t.Error("AAAA record should be in common types")
+	}
+	if !typeSet[DNSRecordMX] {
+		t.Error("MX record should be in common types")
+	}
+	if !typeSet[DNSRecordTXT] {
+		t.Error("TXT record should be in common types")
+	}
+	if !typeSet[DNSRecordALIAS] {
+		t.Error("ALIAS record should be in common types")
+	}
+}
+
+func TestGetAllDNSRecordTypes(t *testing.T) {
+	types := GetAllDNSRecordTypes()
+
+	if len(types) < 20 {
+		t.Errorf("GetAllDNSRecordTypes should return at least 20 types, got %d", len(types))
+	}
+
+	// Check for ClouDNS-specific types
+	typeSet := make(map[DNSRecordType]bool)
+	for _, typ := range types {
+		typeSet[typ] = true
+	}
+
+	if !typeSet[DNSRecordWR] {
+		t.Error("WR (Web Redirect) should be in all types")
+	}
+	if !typeSet[DNSRecordNAPTR] {
+		t.Error("NAPTR should be in all types")
+	}
+	if !typeSet[DNSRecordDS] {
+		t.Error("DS should be in all types")
+	}
+}
+
 func TestDNSLookupResultStructure(t *testing.T) {
 	result := DNSLookupResult{
 		Domain:    "example.com",
@@ -397,6 +527,141 @@ func TestSOARecordStructure(t *testing.T) {
 	}
 	if soa.Refresh != 7200 {
 		t.Error("Refresh should be 7200")
+	}
+}
+
+// ============================================================================
+// Extended Record Type Structure Tests
+// ============================================================================
+
+func TestCAARecordStructure(t *testing.T) {
+	caa := CAARecord{
+		Flag:  0,
+		Tag:   "issue",
+		Value: "letsencrypt.org",
+	}
+
+	if caa.Tag != "issue" {
+		t.Error("Tag should be 'issue'")
+	}
+	if caa.Value != "letsencrypt.org" {
+		t.Error("Value should be set")
+	}
+}
+
+func TestSSHFPRecordStructure(t *testing.T) {
+	sshfp := SSHFPRecord{
+		Algorithm:   4, // Ed25519
+		FPType:      2, // SHA-256
+		Fingerprint: "abc123def456",
+	}
+
+	if sshfp.Algorithm != 4 {
+		t.Error("Algorithm should be 4 (Ed25519)")
+	}
+	if sshfp.FPType != 2 {
+		t.Error("FPType should be 2 (SHA-256)")
+	}
+}
+
+func TestTLSARecordStructure(t *testing.T) {
+	tlsa := TLSARecord{
+		Usage:        3, // Domain-issued certificate
+		Selector:     1, // SubjectPublicKeyInfo
+		MatchingType: 1, // SHA-256
+		CertData:     "abcd1234",
+	}
+
+	if tlsa.Usage != 3 {
+		t.Error("Usage should be 3")
+	}
+	if tlsa.Selector != 1 {
+		t.Error("Selector should be 1")
+	}
+}
+
+func TestDSRecordStructure(t *testing.T) {
+	ds := DSRecord{
+		KeyTag:     12345,
+		Algorithm:  13, // ECDSAP256SHA256
+		DigestType: 2,  // SHA-256
+		Digest:     "deadbeef",
+	}
+
+	if ds.KeyTag != 12345 {
+		t.Error("KeyTag should be 12345")
+	}
+	if ds.Algorithm != 13 {
+		t.Error("Algorithm should be 13")
+	}
+}
+
+func TestNAPTRRecordStructure(t *testing.T) {
+	naptr := NAPTRRecord{
+		Order:       100,
+		Preference:  10,
+		Flags:       "U",
+		Service:     "E2U+sip",
+		Regexp:      "!^.*$!sip:info@example.com!",
+		Replacement: ".",
+	}
+
+	if naptr.Order != 100 {
+		t.Error("Order should be 100")
+	}
+	if naptr.Service != "E2U+sip" {
+		t.Error("Service should be E2U+sip")
+	}
+}
+
+func TestRPRecordStructure(t *testing.T) {
+	rp := RPRecord{
+		Mailbox: "admin.example.com",
+		TxtDom:  "info.example.com",
+	}
+
+	if rp.Mailbox != "admin.example.com" {
+		t.Error("Mailbox should be set")
+	}
+}
+
+func TestLOCRecordStructure(t *testing.T) {
+	loc := LOCRecord{
+		Latitude:  51.5074,
+		Longitude: -0.1278,
+		Altitude:  11,
+		Size:      10,
+		HPrecis:   10,
+		VPrecis:   10,
+	}
+
+	if loc.Latitude < 51.5 || loc.Latitude > 51.6 {
+		t.Error("Latitude should be near 51.5074")
+	}
+}
+
+func TestALIASRecordStructure(t *testing.T) {
+	alias := ALIASRecord{
+		Target: "target.example.com",
+	}
+
+	if alias.Target != "target.example.com" {
+		t.Error("Target should be set")
+	}
+}
+
+func TestWebRedirectRecordStructure(t *testing.T) {
+	wr := WebRedirectRecord{
+		URL:          "https://www.example.com",
+		RedirectType: 301,
+		Frame:        false,
+	}
+
+	if wr.URL != "https://www.example.com" {
+		t.Error("URL should be set")
+	}
+	if wr.RedirectType != 301 {
+		t.Error("RedirectType should be 301")
 	}
 }
 

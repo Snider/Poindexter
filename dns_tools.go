@@ -21,6 +21,7 @@ import (
 type DNSRecordType string
 
 const (
+	// Standard record types
 	DNSRecordA     DNSRecordType = "A"
 	DNSRecordAAAA  DNSRecordType = "AAAA"
 	DNSRecordMX    DNSRecordType = "MX"
@@ -31,6 +32,21 @@ const (
 	DNSRecordPTR   DNSRecordType = "PTR"
 	DNSRecordSRV   DNSRecordType = "SRV"
 	DNSRecordCAA   DNSRecordType = "CAA"
+
+	// Additional record types (ClouDNS and others)
+	DNSRecordALIAS  DNSRecordType = "ALIAS"  // Virtual ANAME record (ClouDNS, Route53, etc.)
+	DNSRecordRP     DNSRecordType = "RP"     // Responsible Person
+	DNSRecordSSHFP  DNSRecordType = "SSHFP"  // SSH Fingerprint
+	DNSRecordTLSA   DNSRecordType = "TLSA"   // DANE TLS Authentication
+	DNSRecordDS     DNSRecordType = "DS"     // DNSSEC Delegation Signer
+	DNSRecordDNSKEY DNSRecordType = "DNSKEY" // DNSSEC Key
+	DNSRecordNAPTR  DNSRecordType = "NAPTR"  // Naming Authority Pointer
+	DNSRecordLOC    DNSRecordType = "LOC"    // Geographic Location
+	DNSRecordHINFO  DNSRecordType = "HINFO"  // Host Information
+	DNSRecordCERT   DNSRecordType = "CERT"   // Certificate record
+	DNSRecordSMIMEA DNSRecordType = "SMIMEA" // S/MIME Certificate Association
+	DNSRecordWR     DNSRecordType = "WR"     // Web Redirect (ClouDNS specific)
+	DNSRecordSPF    DNSRecordType = "SPF"    // Sender Policy Framework (legacy, use TXT)
 )
 
 // DNSRecord represents a generic DNS record
@@ -64,6 +80,146 @@ type SOARecord struct {
 	Retry      uint32 `json:"retry"`
 	Expire     uint32 `json:"expire"`
 	MinTTL     uint32 `json:"minTtl"`
+}
+
+// CAARecord represents a CAA record
+type CAARecord struct {
+	Flag  uint8  `json:"flag"`
+	Tag   string `json:"tag"`   // "issue", "issuewild", "iodef"
+	Value string `json:"value"`
+}
+
+// SSHFPRecord represents an SSHFP record
+type SSHFPRecord struct {
+	Algorithm   uint8  `json:"algorithm"`   // 1=RSA, 2=DSA, 3=ECDSA, 4=Ed25519
+	FPType      uint8  `json:"fpType"`      // 1=SHA-1, 2=SHA-256
+	Fingerprint string `json:"fingerprint"`
+}
+
+// TLSARecord represents a TLSA (DANE) record
+type TLSARecord struct {
+	Usage        uint8  `json:"usage"`        // 0-3: CA constraint, Service cert, Trust anchor, Domain-issued
+	Selector     uint8  `json:"selector"`     // 0=Full cert, 1=SubjectPublicKeyInfo
+	MatchingType uint8  `json:"matchingType"` // 0=Exact, 1=SHA-256, 2=SHA-512
+	CertData     string `json:"certData"`
+}
+
+// DSRecord represents a DS (DNSSEC Delegation Signer) record
+type DSRecord struct {
+	KeyTag     uint16 `json:"keyTag"`
+	Algorithm  uint8  `json:"algorithm"`
+	DigestType uint8  `json:"digestType"`
+	Digest     string `json:"digest"`
+}
+
+// DNSKEYRecord represents a DNSKEY record
+type DNSKEYRecord struct {
+	Flags     uint16 `json:"flags"`
+	Protocol  uint8  `json:"protocol"`
+	Algorithm uint8  `json:"algorithm"`
+	PublicKey string `json:"publicKey"`
+}
+
+// NAPTRRecord represents a NAPTR record
+type NAPTRRecord struct {
+	Order       uint16 `json:"order"`
+	Preference  uint16 `json:"preference"`
+	Flags       string `json:"flags"`
+	Service     string `json:"service"`
+	Regexp      string `json:"regexp"`
+	Replacement string `json:"replacement"`
+}
+
+// RPRecord represents an RP (Responsible Person) record
+type RPRecord struct {
+	Mailbox string `json:"mailbox"` // Email as DNS name (user.domain.com)
+	TxtDom  string `json:"txtDom"`  // Domain with TXT record containing more info
+}
+
+// LOCRecord represents a LOC (Location) record
+type LOCRecord struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Altitude  float64 `json:"altitude"`
+	Size      float64 `json:"size"`
+	HPrecis   float64 `json:"hPrecision"`
+	VPrecis   float64 `json:"vPrecision"`
+}
+
+// ALIASRecord represents an ALIAS/ANAME record (provider-specific)
+type ALIASRecord struct {
+	Target string `json:"target"`
+}
+
+// WebRedirectRecord represents a Web Redirect record (ClouDNS specific)
+type WebRedirectRecord struct {
+	URL          string `json:"url"`
+	RedirectType int    `json:"redirectType"` // 301, 302, etc.
+	Frame        bool   `json:"frame"`        // Frame redirect vs HTTP redirect
+}
+
+// DNSRecordTypeInfo provides metadata about a DNS record type
+type DNSRecordTypeInfo struct {
+	Type        DNSRecordType `json:"type"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	RFC         string        `json:"rfc,omitempty"`
+	Common      bool          `json:"common"` // Commonly used record type
+}
+
+// GetDNSRecordTypeInfo returns metadata for all supported DNS record types
+func GetDNSRecordTypeInfo() []DNSRecordTypeInfo {
+	return []DNSRecordTypeInfo{
+		// Common record types
+		{DNSRecordA, "A", "IPv4 address record - maps hostname to IPv4", "RFC 1035", true},
+		{DNSRecordAAAA, "AAAA", "IPv6 address record - maps hostname to IPv6", "RFC 3596", true},
+		{DNSRecordCNAME, "CNAME", "Canonical name - alias to another domain", "RFC 1035", true},
+		{DNSRecordMX, "MX", "Mail exchanger - specifies mail servers", "RFC 1035", true},
+		{DNSRecordTXT, "TXT", "Text record - stores arbitrary text (SPF, DKIM, etc.)", "RFC 1035", true},
+		{DNSRecordNS, "NS", "Nameserver - delegates DNS zone to nameservers", "RFC 1035", true},
+		{DNSRecordSOA, "SOA", "Start of Authority - zone administration data", "RFC 1035", true},
+		{DNSRecordPTR, "PTR", "Pointer - reverse DNS lookup (IP to hostname)", "RFC 1035", true},
+		{DNSRecordSRV, "SRV", "Service - locates services (port, priority, weight)", "RFC 2782", true},
+		{DNSRecordCAA, "CAA", "Certification Authority Authorization", "RFC 6844", true},
+
+		// Additional/specialized record types
+		{DNSRecordALIAS, "ALIAS", "Virtual A record - CNAME-like for apex domain", "", true},
+		{DNSRecordRP, "RP", "Responsible Person - contact info for domain", "RFC 1183", false},
+		{DNSRecordSSHFP, "SSHFP", "SSH Fingerprint - SSH host key verification", "RFC 4255", false},
+		{DNSRecordTLSA, "TLSA", "DANE TLS Authentication - certificate pinning", "RFC 6698", false},
+		{DNSRecordDS, "DS", "Delegation Signer - DNSSEC chain of trust", "RFC 4034", false},
+		{DNSRecordDNSKEY, "DNSKEY", "DNSSEC public key", "RFC 4034", false},
+		{DNSRecordNAPTR, "NAPTR", "Naming Authority Pointer - ENUM, SIP routing", "RFC 2915", false},
+		{DNSRecordLOC, "LOC", "Location - geographic coordinates", "RFC 1876", false},
+		{DNSRecordHINFO, "HINFO", "Host Information - CPU and OS type", "RFC 1035", false},
+		{DNSRecordCERT, "CERT", "Certificate - stores certificates", "RFC 4398", false},
+		{DNSRecordSMIMEA, "SMIMEA", "S/MIME Certificate Association", "RFC 8162", false},
+		{DNSRecordSPF, "SPF", "Sender Policy Framework (legacy, use TXT)", "RFC 4408", false},
+		{DNSRecordWR, "WR", "Web Redirect - HTTP redirect (ClouDNS specific)", "", false},
+	}
+}
+
+// GetCommonDNSRecordTypes returns only commonly used record types
+func GetCommonDNSRecordTypes() []DNSRecordType {
+	info := GetDNSRecordTypeInfo()
+	result := make([]DNSRecordType, 0)
+	for _, r := range info {
+		if r.Common {
+			result = append(result, r.Type)
+		}
+	}
+	return result
+}
+
+// GetAllDNSRecordTypes returns all supported record types
+func GetAllDNSRecordTypes() []DNSRecordType {
+	return []DNSRecordType{
+		DNSRecordA, DNSRecordAAAA, DNSRecordCNAME, DNSRecordMX, DNSRecordTXT,
+		DNSRecordNS, DNSRecordSOA, DNSRecordPTR, DNSRecordSRV, DNSRecordCAA,
+		DNSRecordALIAS, DNSRecordRP, DNSRecordSSHFP, DNSRecordTLSA, DNSRecordDS,
+		DNSRecordDNSKEY, DNSRecordNAPTR, DNSRecordLOC, DNSRecordHINFO, DNSRecordCERT,
+		DNSRecordSMIMEA, DNSRecordSPF, DNSRecordWR,
+	}
 }
 
 // DNSLookupResult contains the results of a DNS lookup
