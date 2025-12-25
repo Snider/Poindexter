@@ -527,6 +527,149 @@ func weightedPeerFeatures(_ js.Value, args []js.Value) (any, error) {
 	return weighted, nil
 }
 
+// ============================================================================
+// DNS Tools Functions
+// ============================================================================
+
+func getExternalToolLinks(_ js.Value, args []js.Value) (any, error) {
+	// getExternalToolLinks(domain: string) -> ExternalToolLinks
+	if len(args) < 1 {
+		return nil, errors.New("getExternalToolLinks(domain)")
+	}
+	domain := args[0].String()
+	links := pd.GetExternalToolLinks(domain)
+	return externalToolLinksToJS(links), nil
+}
+
+func getExternalToolLinksIP(_ js.Value, args []js.Value) (any, error) {
+	// getExternalToolLinksIP(ip: string) -> ExternalToolLinks
+	if len(args) < 1 {
+		return nil, errors.New("getExternalToolLinksIP(ip)")
+	}
+	ip := args[0].String()
+	links := pd.GetExternalToolLinksIP(ip)
+	return externalToolLinksToJS(links), nil
+}
+
+func getExternalToolLinksEmail(_ js.Value, args []js.Value) (any, error) {
+	// getExternalToolLinksEmail(emailOrDomain: string) -> ExternalToolLinks
+	if len(args) < 1 {
+		return nil, errors.New("getExternalToolLinksEmail(emailOrDomain)")
+	}
+	emailOrDomain := args[0].String()
+	links := pd.GetExternalToolLinksEmail(emailOrDomain)
+	return externalToolLinksToJS(links), nil
+}
+
+func externalToolLinksToJS(links pd.ExternalToolLinks) map[string]any {
+	return map[string]any{
+		"target": links.Target,
+		"type":   links.Type,
+		// MXToolbox
+		"mxtoolboxDns":       links.MXToolboxDNS,
+		"mxtoolboxMx":        links.MXToolboxMX,
+		"mxtoolboxBlacklist": links.MXToolboxBlacklist,
+		"mxtoolboxSmtp":      links.MXToolboxSMTP,
+		"mxtoolboxSpf":       links.MXToolboxSPF,
+		"mxtoolboxDmarc":     links.MXToolboxDMARC,
+		"mxtoolboxDkim":      links.MXToolboxDKIM,
+		"mxtoolboxHttp":      links.MXToolboxHTTP,
+		"mxtoolboxHttps":     links.MXToolboxHTTPS,
+		"mxtoolboxPing":      links.MXToolboxPing,
+		"mxtoolboxTrace":     links.MXToolboxTrace,
+		"mxtoolboxWhois":     links.MXToolboxWhois,
+		"mxtoolboxAsn":       links.MXToolboxASN,
+		// DNSChecker
+		"dnscheckerDns":         links.DNSCheckerDNS,
+		"dnscheckerPropagation": links.DNSCheckerPropagation,
+		// Other tools
+		"whois":          links.WhoIs,
+		"viewdns":        links.ViewDNS,
+		"intodns":        links.IntoDNS,
+		"dnsviz":         links.DNSViz,
+		"securitytrails": links.SecurityTrails,
+		"shodan":         links.Shodan,
+		"censys":         links.Censys,
+		"builtwith":      links.BuiltWith,
+		"ssllabs":        links.SSLLabs,
+		"hstsPreload":    links.HSTSPreload,
+		"hardenize":      links.Hardenize,
+		// IP-specific
+		"ipinfo":      links.IPInfo,
+		"abuseipdb":   links.AbuseIPDB,
+		"virustotal":  links.VirusTotal,
+		"threatcrowd": links.ThreatCrowd,
+		// Email-specific
+		"mailtester": links.MailTester,
+		"learndmarc": links.LearnDMARC,
+	}
+}
+
+func getRDAPServers(_ js.Value, _ []js.Value) (any, error) {
+	// Returns a list of known RDAP servers for reference
+	servers := map[string]any{
+		"tlds": map[string]string{
+			"com":  "https://rdap.verisign.com/com/v1/",
+			"net":  "https://rdap.verisign.com/net/v1/",
+			"org":  "https://rdap.publicinterestregistry.org/rdap/",
+			"info": "https://rdap.afilias.net/rdap/info/",
+			"io":   "https://rdap.nic.io/",
+			"co":   "https://rdap.nic.co/",
+			"dev":  "https://rdap.nic.google/",
+			"app":  "https://rdap.nic.google/",
+		},
+		"rirs": map[string]string{
+			"arin":    "https://rdap.arin.net/registry/",
+			"ripe":    "https://rdap.db.ripe.net/",
+			"apnic":   "https://rdap.apnic.net/",
+			"afrinic": "https://rdap.afrinic.net/rdap/",
+			"lacnic":  "https://rdap.lacnic.net/rdap/",
+		},
+		"universal": "https://rdap.org/",
+	}
+	return servers, nil
+}
+
+func buildRDAPDomainURL(_ js.Value, args []js.Value) (any, error) {
+	// buildRDAPDomainURL(domain: string) -> string
+	if len(args) < 1 {
+		return nil, errors.New("buildRDAPDomainURL(domain)")
+	}
+	domain := args[0].String()
+	// Use universal RDAP redirector
+	return fmt.Sprintf("https://rdap.org/domain/%s", domain), nil
+}
+
+func buildRDAPIPURL(_ js.Value, args []js.Value) (any, error) {
+	// buildRDAPIPURL(ip: string) -> string
+	if len(args) < 1 {
+		return nil, errors.New("buildRDAPIPURL(ip)")
+	}
+	ip := args[0].String()
+	return fmt.Sprintf("https://rdap.org/ip/%s", ip), nil
+}
+
+func buildRDAPASNURL(_ js.Value, args []js.Value) (any, error) {
+	// buildRDAPASNURL(asn: string) -> string
+	if len(args) < 1 {
+		return nil, errors.New("buildRDAPASNURL(asn)")
+	}
+	asn := args[0].String()
+	// Normalize ASN
+	asnNum := asn
+	if len(asn) > 2 && (asn[:2] == "AS" || asn[:2] == "as") {
+		asnNum = asn[2:]
+	}
+	return fmt.Sprintf("https://rdap.org/autnum/%s", asnNum), nil
+}
+
+func getDNSRecordTypes(_ js.Value, _ []js.Value) (any, error) {
+	// Returns available DNS record types
+	return []string{
+		"A", "AAAA", "MX", "TXT", "NS", "CNAME", "SOA", "PTR", "SRV", "CAA",
+	}, nil
+}
+
 func main() {
 	// Export core API
 	export("pxVersion", version)
@@ -556,6 +699,16 @@ func main() {
 	export("pxGetDefaultPeerFeatureRanges", getDefaultPeerFeatureRanges)
 	export("pxNormalizePeerFeatures", normalizePeerFeatures)
 	export("pxWeightedPeerFeatures", weightedPeerFeatures)
+
+	// Export DNS tools API
+	export("pxGetExternalToolLinks", getExternalToolLinks)
+	export("pxGetExternalToolLinksIP", getExternalToolLinksIP)
+	export("pxGetExternalToolLinksEmail", getExternalToolLinksEmail)
+	export("pxGetRDAPServers", getRDAPServers)
+	export("pxBuildRDAPDomainURL", buildRDAPDomainURL)
+	export("pxBuildRDAPIPURL", buildRDAPIPURL)
+	export("pxBuildRDAPASNURL", buildRDAPASNURL)
+	export("pxGetDNSRecordTypes", getDNSRecordTypes)
 
 	// Keep running
 	select {}

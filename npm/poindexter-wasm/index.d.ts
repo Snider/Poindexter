@@ -190,6 +190,216 @@ export interface InitOptions {
 }
 
 // ============================================================================
+// DNS Tools Types
+// ============================================================================
+
+/** DNS record types */
+export type DNSRecordType = 'A' | 'AAAA' | 'MX' | 'TXT' | 'NS' | 'CNAME' | 'SOA' | 'PTR' | 'SRV' | 'CAA';
+
+/** External tool links for domain/IP/email analysis */
+export interface ExternalToolLinks {
+  target: string;
+  type: 'domain' | 'ip' | 'email';
+
+  // MXToolbox links
+  mxtoolboxDns?: string;
+  mxtoolboxMx?: string;
+  mxtoolboxBlacklist?: string;
+  mxtoolboxSmtp?: string;
+  mxtoolboxSpf?: string;
+  mxtoolboxDmarc?: string;
+  mxtoolboxDkim?: string;
+  mxtoolboxHttp?: string;
+  mxtoolboxHttps?: string;
+  mxtoolboxPing?: string;
+  mxtoolboxTrace?: string;
+  mxtoolboxWhois?: string;
+  mxtoolboxAsn?: string;
+
+  // DNSChecker links
+  dnscheckerDns?: string;
+  dnscheckerPropagation?: string;
+
+  // Other tools
+  whois?: string;
+  viewdns?: string;
+  intodns?: string;
+  dnsviz?: string;
+  securitytrails?: string;
+  shodan?: string;
+  censys?: string;
+  builtwith?: string;
+  ssllabs?: string;
+  hstsPreload?: string;
+  hardenize?: string;
+
+  // IP-specific tools
+  ipinfo?: string;
+  abuseipdb?: string;
+  virustotal?: string;
+  threatcrowd?: string;
+
+  // Email-specific tools
+  mailtester?: string;
+  learndmarc?: string;
+}
+
+/** RDAP server registry */
+export interface RDAPServers {
+  tlds: Record<string, string>;
+  rirs: Record<string, string>;
+  universal: string;
+}
+
+/** RDAP response event */
+export interface RDAPEvent {
+  eventAction: string;
+  eventDate: string;
+  eventActor?: string;
+}
+
+/** RDAP entity (registrar, registrant, etc.) */
+export interface RDAPEntity {
+  handle?: string;
+  roles?: string[];
+  vcardArray?: any[];
+  entities?: RDAPEntity[];
+  events?: RDAPEvent[];
+}
+
+/** RDAP nameserver */
+export interface RDAPNameserver {
+  ldhName: string;
+  ipAddresses?: {
+    v4?: string[];
+    v6?: string[];
+  };
+}
+
+/** RDAP link */
+export interface RDAPLink {
+  value?: string;
+  rel?: string;
+  href?: string;
+  type?: string;
+}
+
+/** RDAP remark/notice */
+export interface RDAPRemark {
+  title?: string;
+  description?: string[];
+  links?: RDAPLink[];
+}
+
+/** RDAP response (for domain, IP, or ASN lookups) */
+export interface RDAPResponse {
+  // Common fields
+  handle?: string;
+  ldhName?: string;
+  unicodeName?: string;
+  status?: string[];
+  events?: RDAPEvent[];
+  entities?: RDAPEntity[];
+  nameservers?: RDAPNameserver[];
+  links?: RDAPLink[];
+  remarks?: RDAPRemark[];
+  notices?: RDAPRemark[];
+
+  // Network-specific (for IP lookups)
+  startAddress?: string;
+  endAddress?: string;
+  ipVersion?: string;
+  name?: string;
+  type?: string;
+  country?: string;
+  parentHandle?: string;
+
+  // Error fields
+  errorCode?: number;
+  title?: string;
+  description?: string[];
+
+  // Metadata
+  rawJson?: string;
+  lookupTimeMs: number;
+  timestamp: string;
+  error?: string;
+}
+
+/** Parsed domain info from RDAP */
+export interface ParsedDomainInfo {
+  domain: string;
+  registrar?: string;
+  registrationDate?: string;
+  expirationDate?: string;
+  updatedDate?: string;
+  status?: string[];
+  nameservers?: string[];
+  dnssec: boolean;
+}
+
+/** DNS lookup result */
+export interface DNSLookupResult {
+  domain: string;
+  queryType: string;
+  records: DNSRecord[];
+  mxRecords?: MXRecord[];
+  srvRecords?: SRVRecord[];
+  soaRecord?: SOARecord;
+  lookupTimeMs: number;
+  error?: string;
+  timestamp: string;
+}
+
+/** DNS record */
+export interface DNSRecord {
+  type: DNSRecordType;
+  name: string;
+  value: string;
+  ttl?: number;
+}
+
+/** MX record */
+export interface MXRecord {
+  host: string;
+  priority: number;
+}
+
+/** SRV record */
+export interface SRVRecord {
+  target: string;
+  port: number;
+  priority: number;
+  weight: number;
+}
+
+/** SOA record */
+export interface SOARecord {
+  primaryNs: string;
+  adminEmail: string;
+  serial: number;
+  refresh: number;
+  retry: number;
+  expire: number;
+  minTtl: number;
+}
+
+/** Complete DNS lookup result */
+export interface CompleteDNSLookup {
+  domain: string;
+  a?: string[];
+  aaaa?: string[];
+  mx?: MXRecord[];
+  ns?: string[];
+  txt?: string[];
+  cname?: string;
+  soa?: SOARecord;
+  lookupTimeMs: number;
+  errors?: string[];
+  timestamp: string;
+}
+
+// ============================================================================
 // Main API
 // ============================================================================
 
@@ -209,6 +419,16 @@ export interface PxAPI {
   getDefaultPeerFeatureRanges(): Promise<FeatureRanges>;
   normalizePeerFeatures(features: number[], ranges?: FeatureRanges): Promise<number[]>;
   weightedPeerFeatures(normalized: number[], weights: number[]): Promise<number[]>;
+
+  // DNS tools
+  getExternalToolLinks(domain: string): Promise<ExternalToolLinks>;
+  getExternalToolLinksIP(ip: string): Promise<ExternalToolLinks>;
+  getExternalToolLinksEmail(emailOrDomain: string): Promise<ExternalToolLinks>;
+  getRDAPServers(): Promise<RDAPServers>;
+  buildRDAPDomainURL(domain: string): Promise<string>;
+  buildRDAPIPURL(ip: string): Promise<string>;
+  buildRDAPASNURL(asn: string): Promise<string>;
+  getDNSRecordTypes(): Promise<DNSRecordType[]>;
 }
 
 export function init(options?: InitOptions): Promise<PxAPI>;

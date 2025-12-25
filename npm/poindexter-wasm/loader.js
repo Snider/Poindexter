@@ -100,7 +100,16 @@ export async function init(options = {}) {
     getDefaultQualityWeights: async () => call('pxGetDefaultQualityWeights'),
     getDefaultPeerFeatureRanges: async () => call('pxGetDefaultPeerFeatureRanges'),
     normalizePeerFeatures: async (features, ranges) => call('pxNormalizePeerFeatures', features, ranges),
-    weightedPeerFeatures: async (normalized, weights) => call('pxWeightedPeerFeatures', normalized, weights)
+    weightedPeerFeatures: async (normalized, weights) => call('pxWeightedPeerFeatures', normalized, weights),
+    // DNS tools
+    getExternalToolLinks: async (domain) => call('pxGetExternalToolLinks', domain),
+    getExternalToolLinksIP: async (ip) => call('pxGetExternalToolLinksIP', ip),
+    getExternalToolLinksEmail: async (emailOrDomain) => call('pxGetExternalToolLinksEmail', emailOrDomain),
+    getRDAPServers: async () => call('pxGetRDAPServers'),
+    buildRDAPDomainURL: async (domain) => call('pxBuildRDAPDomainURL', domain),
+    buildRDAPIPURL: async (ip) => call('pxBuildRDAPIPURL', ip),
+    buildRDAPASNURL: async (asn) => call('pxBuildRDAPASNURL', asn),
+    getDNSRecordTypes: async () => call('pxGetDNSRecordTypes')
   };
 
   return api;
