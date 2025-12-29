@@ -1,0 +1,2218 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Poindexter Go Library Documentation">
+      
+      
+        <meta name="author" content="Snider">
+      
+      
+      
+        <link rel="prev" href="../kdtree-multidimensional/">
+      
+      
+        <link rel="next" href="../perf/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>API Reference - Poindexter</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Poindexter" class="md-header__button md-logo" aria-label="Poindexter" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Poindexter
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Snider/Poindexter" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Snider/Poindexter
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../wasm/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  WebAssembly (Browser)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../dht-best-ping/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../perf/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Performance
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../license/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  License
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Poindexter" class="md-nav__button md-logo" aria-label="Poindexter" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Poindexter
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Snider/Poindexter" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Snider/Poindexter
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wasm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebAssembly (Browser)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dht-best-ping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Best Ping Peer (DHT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kdtree-multidimensional/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Dimensional KDTree (DHT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hello" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hello
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sorting-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sorting Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sorting Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Sorting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Sorting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sortints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortInts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortintsdescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortIntsDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortStrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortstringsdescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortStringsDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortfloat64s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortFloat64s
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortfloat64sdescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortFloat64sDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Sorting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Sorting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sortby" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortBy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortbykey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortByKey
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortbykeydescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortByKeyDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checking-if-sorted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking if Sorted
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Checking if Sorted">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issorted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IsSorted
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issortedstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IsSortedStrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issortedfloat64s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IsSortedFloat64s
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binary-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binary Search
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Binary Search">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#binarysearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BinarySearch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binarysearchstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BinarySearchStrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Helpers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-constructors-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Constructors and Errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KDTree Constructors and Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#newkdtree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NewKDTree
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#newkdtreefromdim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NewKDTreeFromDim
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-notes-complexity-ties-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Notes: Complexity, Ties, Concurrency
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-normalization-stats-reuse-across-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Normalization Stats (reuse across updates)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KDTree Normalization Stats (reuse across updates)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compute-normalization-stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compute normalization stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-with-precomputed-stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build with precomputed stats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build with precomputed stats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (2D)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-normalization-helpers-nd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Normalization Helpers (N‑D)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-backend-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Backend selection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KDTree Backend selection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-and-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types and options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-metrics-in-the-optimized-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported metrics in the optimized backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hello" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hello
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sorting-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sorting Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sorting Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Sorting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Sorting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sortints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortInts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortintsdescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortIntsDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortStrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortstringsdescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortStringsDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortfloat64s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortFloat64s
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortfloat64sdescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortFloat64sDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Sorting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Sorting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sortby" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortBy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortbykey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortByKey
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sortbykeydescending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SortByKeyDescending
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checking-if-sorted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking if Sorted
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Checking if Sorted">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issorted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IsSorted
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issortedstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IsSortedStrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issortedfloat64s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IsSortedFloat64s
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binary-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binary Search
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Binary Search">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#binarysearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BinarySearch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binarysearchstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BinarySearchStrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Helpers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-constructors-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Constructors and Errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KDTree Constructors and Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#newkdtree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NewKDTree
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#newkdtreefromdim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NewKDTreeFromDim
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-notes-complexity-ties-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Notes: Complexity, Ties, Concurrency
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-normalization-stats-reuse-across-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Normalization Stats (reuse across updates)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KDTree Normalization Stats (reuse across updates)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compute-normalization-stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compute normalization stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-with-precomputed-stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build with precomputed stats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build with precomputed stats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (2D)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-normalization-helpers-nd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Normalization Helpers (N‑D)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kdtree-backend-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KDTree Backend selection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KDTree Backend selection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-and-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types and options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-metrics-in-the-optimized-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported metrics in the optimized backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-reference">API Reference</h1>
+<p>Complete API documentation for the Poindexter library.</p>
+<h2 id="core-functions">Core Functions</h2>
+<h3 id="version">Version</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Version</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span>
+</code></pre></div>
+<p>Returns the current version of the library.</p>
+<p><strong>Returns:</strong>
+- <code>string</code>: The version string (e.g., "0.3.0")</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">version</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">Version</span><span class="p">()</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="c1">// Output: 0.3.0</span>
+</code></pre></div>
+<hr />
+<h3 id="hello">Hello</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Hello</span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span>
+</code></pre></div>
+<p>Returns a greeting message.</p>
+<p><strong>Parameters:</strong>
+- <code>name</code> (string): The name to greet. If empty, defaults to "World"</p>
+<p><strong>Returns:</strong>
+- <code>string</code>: A greeting message</p>
+<p><strong>Examples:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// Greet the world</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nx">message</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">Hello</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span><span class="w"> </span><span class="c1">// Output: Hello, World!</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1">// Greet a specific person</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nx">message</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">Hello</span><span class="p">(</span><span class="s">&quot;Alice&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span><span class="w"> </span><span class="c1">// Output: Hello, Alice!</span>
+</code></pre></div>
+<hr />
+<h2 id="sorting-functions">Sorting Functions</h2>
+<h3 id="basic-sorting">Basic Sorting</h3>
+<h4 id="sortints">SortInts</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortInts</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice of integers in ascending order in place.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">numbers</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">}</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nx">poindexter</span><span class="p">.</span><span class="nx">SortInts</span><span class="p">(</span><span class="nx">numbers</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">numbers</span><span class="p">)</span><span class="w"> </span><span class="c1">// Output: [1 1 3 4 5 9]</span>
+</code></pre></div>
+<hr />
+<h4 id="sortintsdescending">SortIntsDescending</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortIntsDescending</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice of integers in descending order in place.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">numbers</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">}</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nx">poindexter</span><span class="p">.</span><span class="nx">SortIntsDescending</span><span class="p">(</span><span class="nx">numbers</span><span class="p">)</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">numbers</span><span class="p">)</span><span class="w"> </span><span class="c1">// Output: [9 5 4 3 1 1]</span>
+</code></pre></div>
+<hr />
+<h4 id="sortstrings">SortStrings</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortStrings</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice of strings in ascending order in place.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nx">words</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;banana&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;apple&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cherry&quot;</span><span class="p">}</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nx">poindexter</span><span class="p">.</span><span class="nx">SortStrings</span><span class="p">(</span><span class="nx">words</span><span class="p">)</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">words</span><span class="p">)</span><span class="w"> </span><span class="c1">// Output: [apple banana cherry]</span>
+</code></pre></div>
+<hr />
+<h4 id="sortstringsdescending">SortStringsDescending</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortStringsDescending</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice of strings in descending order in place.</p>
+<hr />
+<h4 id="sortfloat64s">SortFloat64s</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortFloat64s</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice of float64 values in ascending order in place.</p>
+<hr />
+<h4 id="sortfloat64sdescending">SortFloat64sDescending</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortFloat64sDescending</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice of float64 values in descending order in place.</p>
+<hr />
+<h3 id="advanced-sorting">Advanced Sorting</h3>
+<h4 id="sortby">SortBy</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortBy</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">less</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice using a custom comparison function.</p>
+<p><strong>Parameters:</strong>
+- <code>data</code>: The slice to sort
+- <code>less</code>: A function that returns true if data[i] should come before data[j]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Person</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nx">Age</span><span class="w">  </span><span class="kt">int</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="p">}</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nx">people</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Person</span><span class="p">{</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Alice&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">},</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Bob&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Charlie&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">35</span><span class="p">},</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="p">}</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="c1">// Sort by age</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="nx">poindexter</span><span class="p">.</span><span class="nx">SortBy</span><span class="p">(</span><span class="nx">people</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">people</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">people</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="p">})</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="c1">// Result: [Bob(25) Alice(30) Charlie(35)]</span>
+</code></pre></div>
+<hr />
+<h4 id="sortbykey">SortByKey</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortByKey</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="nx">K</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">string</span><span class="p">](</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="nx">K</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice by extracting a comparable key from each element in ascending order.</p>
+<p><strong>Parameters:</strong>
+- <code>data</code>: The slice to sort
+- <code>key</code>: A function that extracts a sortable key from each element</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Product</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">    </span><span class="nx">Name</span><span class="w">  </span><span class="kt">string</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nx">Price</span><span class="w"> </span><span class="kt">float64</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="p">}</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="nx">products</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Product</span><span class="p">{</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Apple&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">1.50</span><span class="p">},</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Banana&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.75</span><span class="p">},</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Cherry&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">3.00</span><span class="p">},</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="p">}</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="c1">// Sort by price</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="nx">poindexter</span><span class="p">.</span><span class="nx">SortByKey</span><span class="p">(</span><span class="nx">products</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Product</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Price</span>
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="p">})</span>
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="c1">// Result: [Banana(0.75) Apple(1.50) Cherry(3.00)]</span>
+</code></pre></div>
+<hr />
+<h4 id="sortbykeydescending">SortByKeyDescending</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">SortByKeyDescending</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="nx">K</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">string</span><span class="p">](</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="nx">K</span><span class="p">)</span>
+</code></pre></div>
+<p>Sorts a slice by extracting a comparable key from each element in descending order.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Student</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">    </span><span class="nx">Name</span><span class="w">  </span><span class="kt">string</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">    </span><span class="nx">Score</span><span class="w"> </span><span class="kt">int</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="p">}</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="nx">students</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Student</span><span class="p">{</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Alice&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">85</span><span class="p">},</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Bob&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">92</span><span class="p">},</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">    </span><span class="p">{</span><span class="s">&quot;Charlie&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">78</span><span class="p">},</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="p">}</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="c1">// Sort by score descending</span>
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="nx">poindexter</span><span class="p">.</span><span class="nx">SortByKeyDescending</span><span class="p">(</span><span class="nx">students</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="nx">Student</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">Score</span>
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="p">})</span>
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="c1">// Result: [Bob(92) Alice(85) Charlie(78)]</span>
+</code></pre></div>
+<hr />
+<h3 id="checking-if-sorted">Checking if Sorted</h3>
+<h4 id="issorted">IsSorted</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">IsSorted</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span>
+</code></pre></div>
+<p>Checks if a slice of integers is sorted in ascending order.</p>
+<hr />
+<h4 id="issortedstrings">IsSortedStrings</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">IsSortedStrings</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span>
+</code></pre></div>
+<p>Checks if a slice of strings is sorted in ascending order.</p>
+<hr />
+<h4 id="issortedfloat64s">IsSortedFloat64s</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">IsSortedFloat64s</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span>
+</code></pre></div>
+<p>Checks if a slice of float64 values is sorted in ascending order.</p>
+<hr />
+<h3 id="binary-search">Binary Search</h3>
+<h4 id="binarysearch">BinarySearch</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">BinarySearch</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">target</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span>
+</code></pre></div>
+<p>Performs a binary search on a sorted slice of integers.</p>
+<p><strong>Parameters:</strong>
+- <code>data</code>: A sorted slice of integers
+- <code>target</code>: The value to search for</p>
+<p><strong>Returns:</strong>
+- <code>int</code>: The index where target is found, or -1 if not found</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nx">numbers</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">}</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nx">index</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">BinarySearch</span><span class="p">(</span><span class="nx">numbers</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">)</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span><span class="w"> </span><span class="c1">// Output: 3</span>
+</code></pre></div>
+<hr />
+<h4 id="binarysearchstrings">BinarySearchStrings</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">BinarySearchStrings</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">target</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span>
+</code></pre></div>
+<p>Performs a binary search on a sorted slice of strings.</p>
+<p><strong>Parameters:</strong>
+- <code>data</code>: A sorted slice of strings
+- <code>target</code>: The value to search for</p>
+<p><strong>Returns:</strong>
+- <code>int</code>: The index where target is found, or -1 if not found</p>
+<h2 id="kdtree-helpers">KDTree Helpers</h2>
+<p>Poindexter provides helpers to build normalized, weighted KD points from your own records. These functions min–max normalize each axis over your dataset, optionally invert axes where higher is better (to turn them into “lower cost”), and apply per‑axis weights.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Build2D</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">    </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Build3D</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a><span class="w">    </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="p">,</span><span class="w"> </span><span class="nx">f3</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-25-16" name="__codelineno-25-16" href="#__codelineno-25-16"></a>
+<a id="__codelineno-25-17" name="__codelineno-25-17" href="#__codelineno-25-17"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Build4D</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-25-18" name="__codelineno-25-18" href="#__codelineno-25-18"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-25-19" name="__codelineno-25-19" href="#__codelineno-25-19"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-25-20" name="__codelineno-25-20" href="#__codelineno-25-20"></a><span class="w">    </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="p">,</span><span class="w"> </span><span class="nx">f3</span><span class="p">,</span><span class="w"> </span><span class="nx">f4</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-25-21" name="__codelineno-25-21" href="#__codelineno-25-21"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-25-22" name="__codelineno-25-22" href="#__codelineno-25-22"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-25-23" name="__codelineno-25-23" href="#__codelineno-25-23"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Example (4D over ping, hops, geo, score):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1">// weights and inversion: flip score so higher is better → lower cost</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nx">weights</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">float64</span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">1.2</span><span class="p">}</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nx">invert</span><span class="w">  </span><span class="o">:=</span><span class="w"> </span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">bool</span><span class="p">{</span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">}</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="nx">pts</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">Build4D</span><span class="p">(</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="w">    </span><span class="nx">peers</span><span class="p">,</span>
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">ID</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">PingMS</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Hops</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">GeoKM</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Score</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a><span class="w">    </span><span class="nx">weights</span><span class="p">,</span><span class="w"> </span><span class="nx">invert</span><span class="p">,</span>
+<a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a><span class="p">)</span>
+<a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-26-15" name="__codelineno-26-15" href="#__codelineno-26-15"></a>
+<a id="__codelineno-26-16" name="__codelineno-26-16" href="#__codelineno-26-16"></a><span class="nx">kdt</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">NewKDTree</span><span class="p">(</span><span class="nx">pts</span><span class="p">,</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">WithMetric</span><span class="p">(</span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">EuclideanDistance</span><span class="p">{}))</span>
+<a id="__codelineno-26-17" name="__codelineno-26-17" href="#__codelineno-26-17"></a><span class="nx">best</span><span class="p">,</span><span class="w"> </span><span class="nx">dist</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">kdt</span><span class="p">.</span><span class="nx">Nearest</span><span class="p">([]</span><span class="kt">float64</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">})</span>
+</code></pre></div>
+<p>Notes:
+- Keep and reuse your normalization parameters (min/max) if you need consistency across updates; otherwise rebuild points when the candidate set changes.
+- Use <code>invert</code> to turn “higher is better” features (like scores) into lower costs for distance calculations.</p>
+<hr />
+<h2 id="kdtree-constructors-and-errors">KDTree Constructors and Errors</h2>
+<h3 id="newkdtree">NewKDTree</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">NewKDTree</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span><span class="nx">pts</span><span class="w"> </span><span class="p">[]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="o">...</span><span class="nx">KDOption</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">KDTree</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Build a KDTree from the provided points. All points must have the same dimensionality (&gt; 0) and IDs (if provided) must be unique.</p>
+<p>Possible errors:
+- <code>ErrEmptyPoints</code>: no points provided
+- <code>ErrZeroDim</code>: dimension must be at least 1
+- <code>ErrDimMismatch</code>: inconsistent dimensionality among points
+- <code>ErrDuplicateID</code>: duplicate point ID encountered</p>
+<h3 id="newkdtreefromdim">NewKDTreeFromDim</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">NewKDTreeFromDim</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span><span class="nx">dim</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="o">...</span><span class="nx">KDOption</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">KDTree</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Construct an empty KDTree with the given dimension, then populate later via <code>Insert</code>.</p>
+<hr />
+<h2 id="kdtree-notes-complexity-ties-concurrency">KDTree Notes: Complexity, Ties, Concurrency</h2>
+<ul>
+<li>Complexity: current implementation uses O(n) linear scans for queries (<code>Nearest</code>, <code>KNearest</code>, <code>Radius</code>). Inserts are O(1) amortized. Deletes by ID are O(1) using swap-delete (order not preserved).</li>
+<li>Tie ordering: when multiple neighbors have the same distance, ordering of ties is arbitrary and not stable between calls.</li>
+<li>Concurrency: KDTree is not safe for concurrent mutation. Wrap with a mutex or share immutable snapshots for read-mostly workloads.</li>
+</ul>
+<p>See runnable examples in the repository <code>examples/</code> and the docs pages for 1D DHT and multi-dimensional KDTree usage.</p>
+<h2 id="kdtree-normalization-stats-reuse-across-updates">KDTree Normalization Stats (reuse across updates)</h2>
+<p>To keep normalization consistent across dynamic updates, compute per‑axis min/max once and reuse it to build points later. This avoids drift when the candidate set changes.</p>
+<h3 id="types">Types</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1">// AxisStats holds the min/max observed for a single axis.</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="kd">type</span><span class="w"> </span><span class="nx">AxisStats</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">    </span><span class="nx">Min</span><span class="w"> </span><span class="kt">float64</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">    </span><span class="nx">Max</span><span class="w"> </span><span class="kt">float64</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="p">}</span>
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="c1">// NormStats holds per‑axis normalisation stats; for D dims, Stats has length D.</span>
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="kd">type</span><span class="w"> </span><span class="nx">NormStats</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="w">    </span><span class="nx">Stats</span><span class="w"> </span><span class="p">[]</span><span class="nx">AxisStats</span>
+<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="compute-normalization-stats">Compute normalization stats</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">ComputeNormStats2D</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="nx">NormStats</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="kd">func</span><span class="w"> </span><span class="nx">ComputeNormStats3D</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="p">,</span><span class="w"> </span><span class="nx">f3</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="nx">NormStats</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="kd">func</span><span class="w"> </span><span class="nx">ComputeNormStats4D</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="p">,</span><span class="w"> </span><span class="nx">f3</span><span class="p">,</span><span class="w"> </span><span class="nx">f4</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="nx">NormStats</span>
+</code></pre></div>
+<h3 id="build-with-precomputed-stats">Build with precomputed stats</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Build2DWithStats</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="w">    </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="w">    </span><span class="nx">stats</span><span class="w"> </span><span class="nx">NormStats</span><span class="p">,</span>
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>
+<a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Build3DWithStats</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a><span class="w">    </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="p">,</span><span class="w"> </span><span class="nx">f3</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-31-14" name="__codelineno-31-14" href="#__codelineno-31-14"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-31-15" name="__codelineno-31-15" href="#__codelineno-31-15"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-31-16" name="__codelineno-31-16" href="#__codelineno-31-16"></a><span class="w">    </span><span class="nx">stats</span><span class="w"> </span><span class="nx">NormStats</span><span class="p">,</span>
+<a id="__codelineno-31-17" name="__codelineno-31-17" href="#__codelineno-31-17"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-31-18" name="__codelineno-31-18" href="#__codelineno-31-18"></a>
+<a id="__codelineno-31-19" name="__codelineno-31-19" href="#__codelineno-31-19"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Build4DWithStats</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-31-20" name="__codelineno-31-20" href="#__codelineno-31-20"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-31-21" name="__codelineno-31-21" href="#__codelineno-31-21"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-31-22" name="__codelineno-31-22" href="#__codelineno-31-22"></a><span class="w">    </span><span class="nx">f1</span><span class="p">,</span><span class="w"> </span><span class="nx">f2</span><span class="p">,</span><span class="w"> </span><span class="nx">f3</span><span class="p">,</span><span class="w"> </span><span class="nx">f4</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-31-23" name="__codelineno-31-23" href="#__codelineno-31-23"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-31-24" name="__codelineno-31-24" href="#__codelineno-31-24"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-31-25" name="__codelineno-31-25" href="#__codelineno-31-25"></a><span class="w">    </span><span class="nx">stats</span><span class="w"> </span><span class="nx">NormStats</span><span class="p">,</span>
+<a id="__codelineno-31-26" name="__codelineno-31-26" href="#__codelineno-31-26"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="example-2d">Example (2D)</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1">// Compute stats once over your baseline set</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nx">stats</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">ComputeNormStats2D</span><span class="p">(</span><span class="nx">peers</span><span class="p">,</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">PingMS</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Hops</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="p">)</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="c1">// Build points using those stats (now or later)</span>
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="nx">pts</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">Build2DWithStats</span><span class="p">(</span>
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a><span class="w">    </span><span class="nx">peers</span><span class="p">,</span>
+<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">ID</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">PingMS</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Peer</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Hops</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-32-13" name="__codelineno-32-13" href="#__codelineno-32-13"></a><span class="w">    </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">float64</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">bool</span><span class="p">{</span><span class="kc">false</span><span class="p">,</span><span class="kc">false</span><span class="p">},</span><span class="w"> </span><span class="nx">stats</span><span class="p">,</span>
+<a id="__codelineno-32-14" name="__codelineno-32-14" href="#__codelineno-32-14"></a><span class="p">)</span>
+</code></pre></div>
+<p>Notes:
+- If <code>min==max</code> for an axis, normalized value is <code>0</code> for that axis.
+- <code>invert[i]</code> flips the normalized axis as <code>1 - n</code> before applying <code>weights[i]</code>.
+- These helpers mirror <code>Build2D/3D/4D</code>, but use your provided <code>NormStats</code> instead of recomputing from the items slice.</p>
+<hr />
+<h2 id="kdtree-normalization-helpers-nd">KDTree Normalization Helpers (N‑D)</h2>
+<p>Poindexter includes helpers to build KD points from arbitrary dimensions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">BuildND</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="w">    </span><span class="nx">features</span><span class="w"> </span><span class="p">[]</span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>
+<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a><span class="c1">// Like BuildND but never returns an error. It performs no validation beyond</span>
+<a id="__codelineno-33-10" name="__codelineno-33-10" href="#__codelineno-33-10"></a><span class="c1">// basic length checks and propagates NaN/Inf values from feature extractors.</span>
+<a id="__codelineno-33-11" name="__codelineno-33-11" href="#__codelineno-33-11"></a><span class="kd">func</span><span class="w"> </span><span class="nx">BuildNDNoErr</span><span class="p">[</span><span class="nx">T</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-33-12" name="__codelineno-33-12" href="#__codelineno-33-12"></a><span class="w">    </span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span>
+<a id="__codelineno-33-13" name="__codelineno-33-13" href="#__codelineno-33-13"></a><span class="w">    </span><span class="nx">id</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<a id="__codelineno-33-14" name="__codelineno-33-14" href="#__codelineno-33-14"></a><span class="w">    </span><span class="nx">features</span><span class="w"> </span><span class="p">[]</span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-33-15" name="__codelineno-33-15" href="#__codelineno-33-15"></a><span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">,</span>
+<a id="__codelineno-33-16" name="__codelineno-33-16" href="#__codelineno-33-16"></a><span class="w">    </span><span class="nx">invert</span><span class="w"> </span><span class="p">[]</span><span class="kt">bool</span><span class="p">,</span>
+<a id="__codelineno-33-17" name="__codelineno-33-17" href="#__codelineno-33-17"></a><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">KDPoint</span><span class="p">[</span><span class="nx">T</span><span class="p">]</span>
+</code></pre></div>
+<ul>
+<li><code>features</code>: extract raw values per axis.</li>
+<li><code>weights</code>: per-axis weights, same length as <code>features</code>.</li>
+<li><code>invert</code>: if true for an axis, uses <code>1 - normalized</code> before weighting (turns “higher is better” into lower cost).</li>
+<li>Use <code>ComputeNormStatsND</code> + <code>BuildNDWithStats</code> to reuse normalization between updates.</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="nx">pts</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">BuildNDNoErr</span><span class="p">(</span><span class="nx">records</span><span class="p">,</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Rec</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">ID</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="w">    </span><span class="p">[]</span><span class="kd">func</span><span class="p">(</span><span class="nx">Rec</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="p">{</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="w">        </span><span class="kd">func</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Rec</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">PingMS</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="w">        </span><span class="kd">func</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Rec</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Hops</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a><span class="w">        </span><span class="kd">func</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Rec</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">GeoKM</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a><span class="w">        </span><span class="kd">func</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Rec</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Score</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a><span class="w">    </span><span class="p">[]</span><span class="kt">float64</span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">1.2</span><span class="p">},</span>
+<a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a><span class="w">    </span><span class="p">[]</span><span class="kt">bool</span><span class="p">{</span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="kdtree-backend-selection">KDTree Backend selection</h2>
+<p>Poindexter provides two internal backends for KDTree queries:</p>
+<ul>
+<li><code>linear</code>: always available; performs O(n) scans for <code>Nearest</code>, <code>KNearest</code>, and <code>Radius</code>.</li>
+<li><code>gonum</code>: optimized KD backend compiled when you build with the <code>gonum</code> build tag; typically sub-linear on prunable datasets and modest dimensions.</li>
+</ul>
+<h3 id="types-and-options">Types and options</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="c1">// KDBackend selects the internal engine used by KDTree.</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="kd">type</span><span class="w"> </span><span class="nx">KDBackend</span><span class="w"> </span><span class="kt">string</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="kd">const</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a><span class="w">    </span><span class="nx">BackendLinear</span><span class="w"> </span><span class="nx">KDBackend</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;linear&quot;</span>
+<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a><span class="w">    </span><span class="nx">BackendGonum</span><span class="w">  </span><span class="nx">KDBackend</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;gonum&quot;</span>
+<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a><span class="p">)</span>
+<a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a>
+<a id="__codelineno-35-9" name="__codelineno-35-9" href="#__codelineno-35-9"></a><span class="c1">// WithBackend selects the internal KDTree backend (&quot;linear&quot; or &quot;gonum&quot;).</span>
+<a id="__codelineno-35-10" name="__codelineno-35-10" href="#__codelineno-35-10"></a><span class="c1">// If the requested backend is unavailable (e.g., missing build tag), the constructor</span>
+<a id="__codelineno-35-11" name="__codelineno-35-11" href="#__codelineno-35-11"></a><span class="c1">// falls back to the linear backend.</span>
+<a id="__codelineno-35-12" name="__codelineno-35-12" href="#__codelineno-35-12"></a><span class="kd">func</span><span class="w"> </span><span class="nx">WithBackend</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">KDBackend</span><span class="p">)</span><span class="w"> </span><span class="nx">KDOption</span>
+</code></pre></div>
+<h3 id="default-selection">Default selection</h3>
+<ul>
+<li>Default is <code>linear</code>.</li>
+<li>If you build your project with <code>-tags=gonum</code>, the default becomes <code>gonum</code>.</li>
+</ul>
+<h3 id="usage-examples">Usage examples</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1">// Default metric is Euclidean; you can override with WithMetric.</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="nx">pts</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">KDPoint</span><span class="p">[</span><span class="kt">string</span><span class="p">]{</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">    </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Coords</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}},</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">    </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Coords</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">}},</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="p">}</span>
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="c1">// Force Linear (always available)</span>
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="nx">lin</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">NewKDTree</span><span class="p">(</span><span class="nx">pts</span><span class="p">,</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">WithBackend</span><span class="p">(</span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">BackendLinear</span><span class="p">))</span>
+<a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">lin</span><span class="p">.</span><span class="nx">Nearest</span><span class="p">([]</span><span class="kt">float64</span><span class="p">{</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">})</span>
+<a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a>
+<a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a><span class="c1">// Force Gonum (requires building with: go build -tags=gonum)</span>
+<a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a><span class="nx">gon</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">NewKDTree</span><span class="p">(</span><span class="nx">pts</span><span class="p">,</span><span class="w"> </span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">WithBackend</span><span class="p">(</span><span class="nx">poindexter</span><span class="p">.</span><span class="nx">BackendGonum</span><span class="p">))</span>
+<a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">gon</span><span class="p">.</span><span class="nx">Nearest</span><span class="p">([]</span><span class="kt">float64</span><span class="p">{</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">})</span>
+</code></pre></div>
+<h3 id="supported-metrics-in-the-optimized-backend">Supported metrics in the optimized backend</h3>
+<ul>
+<li>Euclidean (L2), Manhattan (L1), Chebyshev (L∞).</li>
+<li>Cosine and Weighted-Cosine currently use the Linear backend.</li>
+</ul>
+<p>See also the Performance guide for measured comparisons and guidance: <code>docs/perf.md</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Snider
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
