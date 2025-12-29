@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"sort"
+	"time"
 )
 
 var (
@@ -218,6 +219,10 @@ type KDTree[T any] struct {
 	idIndex     map[string]int
 	backend     KDBackend
 	backendData any // opaque handle for backend-specific structures (e.g., gonum tree)
+
+	// Analytics tracking (optional, enabled by default)
+	analytics     *TreeAnalytics
+	peerAnalytics *PeerAnalytics
 }
 
 // NewKDTree builds a KDTree from the given points.
@@ -259,12 +264,14 @@ func NewKDTree[T any](pts []KDPoint[T], opts ...KDOption) (*KDTree[T], error) {
 		backend = BackendLinear // tag not enabled → fallback
 	}
 	t := &KDTree[T]{
-		points:      append([]KDPoint[T](nil), pts...),
-		dim:         dim,
-		metric:      cfg.metric,
-		idIndex:     idIndex,
-		backend:     backend,
-		backendData: backendData,
+		points:        append([]KDPoint[T](nil), pts...),
+		dim:           dim,
+		metric:        cfg.metric,
+		idIndex:       idIndex,
+		backend:       backend,
+		backendData:   backendData,
+		analytics:     NewTreeAnalytics(),
+		peerAnalytics: NewPeerAnalytics(),
 	}
 	return t, nil
 }
@@ -284,12 +291,14 @@ func NewKDTreeFromDim[T any](dim int, opts ...KDOption) (*KDTree[T], error) {
 		backend = BackendLinear
 	}
 	return &KDTree[T]{
-		points:      nil,
-		dim:         dim,
-		metric:      cfg.metric,
-		idIndex:     make(map[string]int),
-		backend:     backend,
-		backendData: nil,
+		points:        nil,
+		dim:           dim,
+		metric:        cfg.metric,
+		idIndex:       make(map[string]int),
+		backend:       backend,
+		backendData:   nil,
+		analytics:     NewTreeAnalytics(),
+		peerAnalytics: NewPeerAnalytics(),
 	}, nil
 }
 
@@ -305,12 +314,23 @@ func (t *KDTree[T]) Nearest(query []float64) (KDPoint[T], float64, bool) {
 	if len(query) != t.dim || t.Len() == 0 {
 		return KDPoint[T]{}, 0, false
 	}
+	start := time.Now()
+	defer func() {
+		if t.analytics != nil {
+			t.analytics.RecordQuery(time.Since(start).Nanoseconds())
+		}
+	}()
+
 	// Gonum backend (if available and built)
 	if t.backend == BackendGonum && t.backendData != nil {
 		if idx, dist, ok := gonumNearest[T](t.backendData, query); ok && idx >= 0 && idx < len(t.points) {
-			return t.points[idx], dist, true
+			p := t.points[idx]
+			if t.peerAnalytics != nil {
+				t.peerAnalytics.RecordSelection(p.ID, dist)
+			}
+			return p, dist, true
 		}
-		// fall through to linear scan if backend didn’t return a result
+		// fall through to linear scan if backend didn't return a result
 	}
 	bestIdx := -1
 	bestDist := math.MaxFloat64
@@ -324,7 +344,11 @@ func (t *KDTree[T]) Nearest(query []float64) (KDPoint[T], float64, bool) {
 	if bestIdx < 0 {
 		return KDPoint[T]{}, 0, false
 	}
-	return t.points[bestIdx], bestDist, true
+	p := t.points[bestIdx]
+	if t.peerAnalytics != nil {
+		t.peerAnalytics.RecordSelection(p.ID, bestDist)
+	}
+	return p, bestDist, true
 }
 
 // KNearest returns up to k nearest neighbors to the query in ascending distance order.
@@ -333,6 +357,13 @@ func (t *KDTree[T]) KNearest(query []float64, k int) ([]KDPoint[T], []float64) {
 	if k <= 0 || len(query) != t.dim || t.Len() == 0 {
 		return nil, nil
 	}
+	start := time.Now()
+	defer func() {
+		if t.analytics != nil {
+			t.analytics.RecordQuery(time.Since(start).Nanoseconds())
+		}
+	}()
+
 	// Gonum backend path
 	if t.backend == BackendGonum && t.backendData != nil {
 		idxs, dists := gonumKNearest[T](t.backendData, query, k)
@@ -340,6 +371,9 @@ func (t *KDTree[T]) KNearest(query []float64, k int) ([]KDPoint[T], []float64) {
 			neighbors := make([]KDPoint[T], len(idxs))
 			for i := range idxs {
 				neighbors[i] = t.points[idxs[i]]
+				if t.peerAnalytics != nil {
+					t.peerAnalytics.RecordSelection(neighbors[i].ID, dists[i])
+				}
 			}
 			return neighbors, dists
 		}
@@ -362,6 +396,9 @@ func (t *KDTree[T]) KNearest(query []float64, k int) ([]KDPoint[T], []float64) {
 	for i := 0; i < k; i++ {
 		neighbors[i] = t.points[tmp[i].idx]
 		dists[i] = tmp[i].dist
+		if t.peerAnalytics != nil {
+			t.peerAnalytics.RecordSelection(neighbors[i].ID, dists[i])
+		}
 	}
 	return neighbors, dists
 }
@@ -371,6 +408,13 @@ func (t *KDTree[T]) Radius(query []float64, r float64) ([]KDPoint[T], []float64)
 	if r < 0 || len(query) != t.dim || t.Len() == 0 {
 		return nil, nil
 	}
+	start := time.Now()
+	defer func() {
+		if t.analytics != nil {
+			t.analytics.RecordQuery(time.Since(start).Nanoseconds())
+		}
+	}()
+
 	// Gonum backend path
 	if t.backend == BackendGonum && t.backendData != nil {
 		idxs, dists := gonumRadius[T](t.backendData, query, r)
@@ -378,6 +422,9 @@ func (t *KDTree[T]) Radius(query []float64, r float64) ([]KDPoint[T], []float64)
 			neighbors := make([]KDPoint[T], len(idxs))
 			for i := range idxs {
 				neighbors[i] = t.points[idxs[i]]
+				if t.peerAnalytics != nil {
+					t.peerAnalytics.RecordSelection(neighbors[i].ID, dists[i])
+				}
 			}
 			return neighbors, dists
 		}
@@ -402,6 +449,9 @@ func (t *KDTree[T]) Radius(query []float64, r float64) ([]KDPoint[T], []float64)
 	for i := range sel {
 		neighbors[i] = t.points[sel[i].idx]
 		dists[i] = sel[i].dist
+		if t.peerAnalytics != nil {
+			t.peerAnalytics.RecordSelection(neighbors[i].ID, dists[i])
+		}
 	}
 	return neighbors, dists
 }
@@ -421,10 +471,17 @@ func (t *KDTree[T]) Insert(p KDPoint[T]) bool {
 	if p.ID != "" {
 		t.idIndex[p.ID] = len(t.points) - 1
 	}
+	// Record insert in analytics
+	if t.analytics != nil {
+		t.analytics.RecordInsert()
+	}
 	// Rebuild backend if using Gonum
 	if t.backend == BackendGonum && hasGonum() {
 		if bd, err := buildGonumBackend(t.points, t.metric); err == nil {
 			t.backendData = bd
+			if t.analytics != nil {
+				t.analytics.RecordRebuild()
+			}
 		} else {
 			// fallback to linear if rebuild fails
 			t.backend = BackendLinear
@@ -451,10 +508,17 @@ func (t *KDTree[T]) DeleteByID(id string) bool {
 	}
 	t.points = t.points[:last]
 	delete(t.idIndex, id)
+	// Record delete in analytics
+	if t.analytics != nil {
+		t.analytics.RecordDelete()
+	}
 	// Rebuild backend if using Gonum
 	if t.backend == BackendGonum && hasGonum() {
 		if bd, err := buildGonumBackend(t.points, t.metric); err == nil {
 			t.backendData = bd
+			if t.analytics != nil {
+				t.analytics.RecordRebuild()
+			}
 		} else {
 			// fallback to linear if rebuild fails
 			t.backend = BackendLinear
@@ -462,4 +526,68 @@ func (t *KDTree[T]) DeleteByID(id string) bool {
 		}
 	}
 	return true
+}
+
+// Analytics returns the tree analytics tracker.
+// Returns nil if analytics tracking is disabled.
+func (t *KDTree[T]) Analytics() *TreeAnalytics {
+	return t.analytics
+}
+
+// PeerAnalytics returns the peer analytics tracker.
+// Returns nil if peer analytics tracking is disabled.
+func (t *KDTree[T]) PeerAnalytics() *PeerAnalytics {
+	return t.peerAnalytics
+}
+
+// GetAnalyticsSnapshot returns a point-in-time snapshot of tree analytics.
+func (t *KDTree[T]) GetAnalyticsSnapshot() TreeAnalyticsSnapshot {
+	if t.analytics == nil {
+		return TreeAnalyticsSnapshot{}
+	}
+	return t.analytics.Snapshot()
+}
+
+// GetPeerStats returns per-peer selection statistics.
+func (t *KDTree[T]) GetPeerStats() []PeerStats {
+	if t.peerAnalytics == nil {
+		return nil
+	}
+	return t.peerAnalytics.GetAllPeerStats()
+}
+
+// GetTopPeers returns the top N most frequently selected peers.
+func (t *KDTree[T]) GetTopPeers(n int) []PeerStats {
+	if t.peerAnalytics == nil {
+		return nil
+	}
+	return t.peerAnalytics.GetTopPeers(n)
+}
+
+// ComputeDistanceDistribution analyzes the distribution of current point coordinates.
+func (t *KDTree[T]) ComputeDistanceDistribution(axisNames []string) []AxisDistribution {
+	return ComputeAxisDistributions(t.points, axisNames)
+}
+
+// ResetAnalytics clears all analytics data.
+func (t *KDTree[T]) ResetAnalytics() {
+	if t.analytics != nil {
+		t.analytics.Reset()
+	}
+	if t.peerAnalytics != nil {
+		t.peerAnalytics.Reset()
+	}
+}
+
+// Points returns a copy of all points in the tree.
+// This is useful for analytics and export operations.
+func (t *KDTree[T]) Points() []KDPoint[T] {
+	result := make([]KDPoint[T], len(t.points))
+	copy(result, t.points)
+	return result
+}
+
+// Backend returns the active backend type.
+func (t *KDTree[T]) Backend() KDBackend {
+	return t.backend
 }

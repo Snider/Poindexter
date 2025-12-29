@@ -40,6 +40,7 @@ function call(name, ...args) {
 
 class PxTree {
   constructor(treeId) { this.treeId = treeId; }
+  // Core operations
   async len() { return call('pxTreeLen', this.treeId); }
   async dim() { return call('pxTreeDim', this.treeId); }
   async insert(point) { return call('pxInsert', this.treeId, point); }
@@ -48,6 +49,12 @@ class PxTree {
   async kNearest(query, k) { return call('pxKNearest', this.treeId, query, k); }
   async radius(query, r) { return call('pxRadius', this.treeId, query, r); }
   async exportJSON() { return call('pxExportJSON', this.treeId); }
+  // Analytics operations
+  async getAnalytics() { return call('pxGetAnalytics', this.treeId); }
+  async getPeerStats() { return call('pxGetPeerStats', this.treeId); }
+  async getTopPeers(n) { return call('pxGetTopPeers', this.treeId, n); }
+  async getAxisDistributions(axisNames) { return call('pxGetAxisDistributions', this.treeId, axisNames); }
+  async resetAnalytics() { return call('pxResetAnalytics', this.treeId); }
 }
 
 export async function init(options = {}) {
@@ -78,12 +85,33 @@ export async function init(options = {}) {
   go.run(result.instance);
 
   const api = {
+    // Core functions
     version: async () => call('pxVersion'),
     hello: async (name) => call('pxHello', name ?? ''),
     newTree: async (dim) => {
       const info = call('pxNewTree', dim);
       return new PxTree(info.treeId);
-    }
+    },
+    // Statistics utilities
+    computeDistributionStats: async (distances) => call('pxComputeDistributionStats', distances),
+    // NAT routing / peer quality functions
+    computePeerQualityScore: async (metrics, weights) => call('pxComputePeerQualityScore', metrics, weights),
+    computeTrustScore: async (metrics) => call('pxComputeTrustScore', metrics),
+    getDefaultQualityWeights: async () => call('pxGetDefaultQualityWeights'),
+    getDefaultPeerFeatureRanges: async () => call('pxGetDefaultPeerFeatureRanges'),
+    normalizePeerFeatures: async (features, ranges) => call('pxNormalizePeerFeatures', features, ranges),
+    weightedPeerFeatures: async (normalized, weights) => call('pxWeightedPeerFeatures', normalized, weights),
+    // DNS tools
+    getExternalToolLinks: async (domain) => call('pxGetExternalToolLinks', domain),
+    getExternalToolLinksIP: async (ip) => call('pxGetExternalToolLinksIP', ip),
+    getExternalToolLinksEmail: async (emailOrDomain) => call('pxGetExternalToolLinksEmail', emailOrDomain),
+    getRDAPServers: async () => call('pxGetRDAPServers'),
+    buildRDAPDomainURL: async (domain) => call('pxBuildRDAPDomainURL', domain),
+    buildRDAPIPURL: async (ip) => call('pxBuildRDAPIPURL', ip),
+    buildRDAPASNURL: async (asn) => call('pxBuildRDAPASNURL', asn),
+    getDNSRecordTypes: async () => call('pxGetDNSRecordTypes'),
+    getDNSRecordTypeInfo: async () => call('pxGetDNSRecordTypeInfo'),
+    getCommonDNSRecordTypes: async () => call('pxGetCommonDNSRecordTypes')
   };
 
   return api;
