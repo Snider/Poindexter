@@ -42,11 +42,36 @@ This document audits the public API of the Poindexter Go library, focusing on de
 
 *   The public API appears to be free of potential panics. The library consistently uses error returns and input validation to handle exceptional cases.
 
+## 4. Recent API Design and Ergonomics Improvements
+
+### 4.1. "God Class" Refactoring in `kdtree_analytics.go`
+
+The file `kdtree_analytics.go` exhibited "God Class" characteristics, combining core tree analytics with unrelated responsibilities like peer trust scoring and NAT metrics. This made the code difficult to maintain and understand.
+
+**Changes Made:**
+To address the "God Class" issue, `kdtree_analytics.go` was decomposed into three distinct files:
+
+*   `kdtree_analytics.go`: Now contains only the core tree analytics.
+*   `peer_trust.go`: Contains the peer trust scoring logic.
+*   `nat_metrics.go`: Contains the NAT-related metrics.
+
+### 4.2. Method Naming Improvements
+
+The method `ComputeDistanceDistribution` in `kdtree.go` was inconsistently named, as it actually computed axis-based distributions, not distance distributions.
+
+**Changes Made:**
+Renamed the `ComputeDistanceDistribution` method to `ComputeAxisDistributions` to more accurately reflect its functionality.
+
+### 4.3. Refactored `kdtree.go`
+
+Updated `kdtree.go` to use the new, more focused modules. Removed the now-unnecessary `ResetAnalytics` methods, which were tightly coupled to the old analytics implementation.
+
 ## Summary and Recommendations
 
-The Poindexter library's public API is well-designed, consistent, and follows Go best practices. The use of generics, the options pattern, and clear error handling make it a robust and user-friendly library.
+The Poindexter library's public API is well-designed, consistent, and follows Go best practices. The use of generics, the options pattern, and clear error handling make it a robust and user-friendly library. Recent refactoring efforts have improved modularity and maintainability.
 
 **Recommendations:**
 
 1.  **Naming Consistency:** Consider renaming `IsSorted`, `IsSortedStrings`, and `IsSortedFloat64s` to `IntsAreSorted`, `StringsAreSorted`, and `Float64sAreSorted` to align more closely with the standard library's `sort` package.
 2.  **Defensive Copying:** The `Points()` method returns a copy of the internal slice, which is excellent. Ensure that any future methods that expose internal state also return copies to prevent mutation by callers.
+3.  **Continued Modularization:** The recent decomposition of `kdtree_analytics.go` is a positive step. Continue to evaluate the codebase for opportunities to separate concerns and improve maintainability.
