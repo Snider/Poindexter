@@ -18,26 +18,62 @@ var (
 	nextTreeID   = 1
 )
 
+// WasmError provides a structured error for WASM responses.
+type WasmError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+func (e *WasmError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Code, e.Message)
+}
+
+// Standard error codes.
+const (
+	ErrCodeBadRequest = "bad_request"
+	ErrCodeNotFound   = "not_found"
+	ErrCodeConflict   = "conflict"
+)
+
+func newErr(code, msg string) *WasmError {
+	return &WasmError{Code: code, Message: msg}
+}
+
+func newErrf(code, format string, args ...any) *WasmError {
+	return &WasmError{Code: code, Message: fmt.Sprintf(format, args...)}
+}
+
 func export(name string, fn func(this js.Value, args []js.Value) (any, error)) {
 	js.Global().Set(name, js.FuncOf(func(this js.Value, args []js.Value) any {
 		res, err := fn(this, args)
 		if err != nil {
-			return map[string]any{"ok": false, "error": err.Error()}
+			var wasmErr *WasmError
+			if errors.As(err, &wasmErr) {
+				return map[string]any{
+					"ok":    false,
+					"error": map[string]any{"code": wasmErr.Code, "message": wasmErr.Message},
+				}
+			}
+			// Fallback for generic errors
+			return map[string]any{
+				"ok":    false,
+				"error": map[string]any{"code": ErrCodeBadRequest, "message": err.Error()},
+			}
 		}
 		return map[string]any{"ok": true, "data": res}
 	}))
 }
 
-func getInt(v js.Value, idx int) (int, error) {
-	if len := v.Length(); len > idx {
-		return v.Index(idx).Int(), nil
+func getInt(args []js.Value, idx int, name string) (int, error) {
+	if len(args) > idx {
+		return args[idx].Int(), nil
 	}
-	return 0, errors.New("missing integer argument")
+	return 0, newErrf(ErrCodeBadRequest, "missing integer argument: %s", name)
 }
 
-func getFloatSlice(arg js.Value) ([]float64, error) {
+func getFloatSlice(arg js.Value, name string) ([]float64, error) {
 	if arg.IsUndefined() || arg.IsNull() {
-		return nil, errors.New("coords/query is undefined or null")
+		return nil, newErrf(ErrCodeBadRequest, "argument is undefined or null: %s", name)
 	}
 	ln := arg.Length()
 	res := make([]float64, ln)
@@ -45,6 +81,19 @@ func getFloatSlice(arg js.Value) ([]float64, error) {
 		res[i] = arg.Index(i).Float()
 	}
 	return res, nil
+}
+
+// pointToJS converts a KDPoint to a JS-friendly map, ensuring slices are []any.
+func pointToJS(p pd.KDPoint[string]) map[string]any {
+	coords := make([]any, len(p.Coords))
+	for i, c := range p.Coords {
+		coords[i] = c
+	}
+	return map[string]any{
+		"id":     p.ID,
+		"coords": coords,
+		"value":  p.Value,
+	}
 }
 
 func version(_ js.Value, _ []js.Value) (any, error) {
@@ -61,15 +110,15 @@ func hello(_ js.Value, args []js.Value) (any, error) {
 
 func newTree(_ js.Value, args []js.Value) (any, error) {
 	if len(args) < 1 {
-		return nil, errors.New("newTree(dim) requires dim")
+		return nil, newErr(ErrCodeBadRequest, "newTree(dim) requires 'dim' argument")
 	}
 	dim := args[0].Int()
 	if dim <= 0 {
-		return nil, pd.ErrZeroDim
+		return nil, newErr(ErrCodeBadRequest, pd.ErrZeroDim.Error())
 	}
 	t, err := pd.NewKDTreeFromDim[string](dim)
 	if err != nil {
-		return nil, err
+		return nil, newErr(ErrCodeBadRequest, err.Error())
 	}
 	id := nextTreeID
 	nextTreeID++
@@ -78,81 +127,95 @@ func newTree(_ js.Value, args []js.Value) (any, error) {
 }
 
 func treeLen(_ js.Value, args []js.Value) (any, error) {
-	if len(args) < 1 {
-		return nil, errors.New("len(treeId)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	return t.Len(), nil
 }
 
 func treeDim(_ js.Value, args []js.Value) (any, error) {
-	if len(args) < 1 {
-		return nil, errors.New("dim(treeId)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	return t.Dim(), nil
 }
 
 func insert(_ js.Value, args []js.Value) (any, error) {
 	// insert(treeId, {id: string, coords: number[], value?: string})
-	if len(args) < 2 {
-		return nil, errors.New("insert(treeId, point)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
+	if len(args) < 2 {
+		return nil, newErr(ErrCodeBadRequest, "insert(treeId, point) requires 'point' argument")
+	}
 	pt := args[1]
 	pid := pt.Get("id").String()
-	coords, err := getFloatSlice(pt.Get("coords"))
+	coords, err := getFloatSlice(pt.Get("coords"), "point.coords")
 	if err != nil {
 		return nil, err
 	}
 	val := pt.Get("value").String()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
-	okIns := t.Insert(pd.KDPoint[string]{ID: pid, Coords: coords, Value: val})
-	return okIns, nil
+	if okIns := t.Insert(pd.KDPoint[string]{ID: pid, Coords: coords, Value: val}); !okIns {
+		return nil, newErr(ErrCodeConflict, "failed to insert point: dimension mismatch or duplicate ID")
+	}
+	return true, nil
 }
 
 func deleteByID(_ js.Value, args []js.Value) (any, error) {
 	// deleteByID(treeId, id)
-	if len(args) < 2 {
-		return nil, errors.New("deleteByID(treeId, id)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
+	if len(args) < 2 {
+		return nil, newErr(ErrCodeBadRequest, "deleteByID(treeId, id) requires 'id' argument")
+	}
 	pid := args[1].String()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
-	return t.DeleteByID(pid), nil
+	if !t.DeleteByID(pid) {
+		return nil, newErrf(ErrCodeNotFound, "point with id '%s' not found", pid)
+	}
+	return true, nil
 }
 
 func nearest(_ js.Value, args []js.Value) (any, error) {
 	// nearest(treeId, query:number[]) -> {point, dist, found}
-	if len(args) < 2 {
-		return nil, errors.New("nearest(treeId, query)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
-	query, err := getFloatSlice(args[1])
+	if len(args) < 2 {
+		return nil, newErr(ErrCodeBadRequest, "nearest(treeId, query) requires 'query' argument")
+	}
+	query, err := getFloatSlice(args[1], "query")
 	if err != nil {
 		return nil, err
 	}
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	p, d, found := t.Nearest(query)
 	out := map[string]any{
-		"point": map[string]any{"id": p.ID, "coords": p.Coords, "value": p.Value},
+		"point": pointToJS(p),
 		"dist":  d,
 		"found": found,
 	}
@@ -161,65 +224,74 @@ func nearest(_ js.Value, args []js.Value) (any, error) {
 
 func kNearest(_ js.Value, args []js.Value) (any, error) {
 	// kNearest(treeId, query:number[], k:int) -> {points:[...], dists:[...]}
-	if len(args) < 3 {
-		return nil, errors.New("kNearest(treeId, query, k)")
-	}
-	id := args[0].Int()
-	query, err := getFloatSlice(args[1])
+	id, err := getInt(args, 0, "treeId")
 	if err != nil {
 		return nil, err
 	}
-	k := args[2].Int()
+	if len(args) < 3 {
+		return nil, newErr(ErrCodeBadRequest, "kNearest(treeId, query, k) requires 'query' and 'k' arguments")
+	}
+	query, err := getFloatSlice(args[1], "query")
+	if err != nil {
+		return nil, err
+	}
+	k, err := getInt(args, 2, "k")
+	if err != nil {
+		return nil, err
+	}
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	pts, dists := t.KNearest(query, k)
 	jsPts := make([]any, len(pts))
 	for i, p := range pts {
-		jsPts[i] = map[string]any{"id": p.ID, "coords": p.Coords, "value": p.Value}
+		jsPts[i] = pointToJS(p)
 	}
 	return map[string]any{"points": jsPts, "dists": dists}, nil
 }
 
 func radius(_ js.Value, args []js.Value) (any, error) {
 	// radius(treeId, query:number[], r:number) -> {points:[...], dists:[...]}
-	if len(args) < 3 {
-		return nil, errors.New("radius(treeId, query, r)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
-	query, err := getFloatSlice(args[1])
+	if len(args) < 3 {
+		return nil, newErr(ErrCodeBadRequest, "radius(treeId, query, r) requires 'query' and 'r' arguments")
+	}
+	query, err := getFloatSlice(args[1], "query")
 	if err != nil {
 		return nil, err
 	}
 	r := args[2].Float()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	pts, dists := t.Radius(query, r)
 	jsPts := make([]any, len(pts))
 	for i, p := range pts {
-		jsPts[i] = map[string]any{"id": p.ID, "coords": p.Coords, "value": p.Value}
+		jsPts[i] = pointToJS(p)
 	}
 	return map[string]any{"points": jsPts, "dists": dists}, nil
 }
 
 func exportJSON(_ js.Value, args []js.Value) (any, error) {
 	// exportJSON(treeId) -> string (all points)
-	if len(args) < 1 {
-		return nil, errors.New("exportJSON(treeId)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	// Export all points
 	points := t.Points()
 	jsPts := make([]any, len(points))
 	for i, p := range points {
-		jsPts[i] = map[string]any{"id": p.ID, "coords": p.Coords, "value": p.Value}
+		jsPts[i] = pointToJS(p)
 	}
 	m := map[string]any{
 		"dim":     t.Dim(),
@@ -233,13 +305,13 @@ func exportJSON(_ js.Value, args []js.Value) (any, error) {
 
 func getAnalytics(_ js.Value, args []js.Value) (any, error) {
 	// getAnalytics(treeId) -> analytics snapshot
-	if len(args) < 1 {
-		return nil, errors.New("getAnalytics(treeId)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	snap := t.GetAnalyticsSnapshot()
 	return map[string]any{
@@ -259,13 +331,13 @@ func getAnalytics(_ js.Value, args []js.Value) (any, error) {
 
 func getPeerStats(_ js.Value, args []js.Value) (any, error) {
 	// getPeerStats(treeId) -> array of peer stats
-	if len(args) < 1 {
-		return nil, errors.New("getPeerStats(treeId)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	stats := t.GetPeerStats()
 	jsStats := make([]any, len(stats))
@@ -282,14 +354,17 @@ func getPeerStats(_ js.Value, args []js.Value) (any, error) {
 
 func getTopPeers(_ js.Value, args []js.Value) (any, error) {
 	// getTopPeers(treeId, n) -> array of top n peer stats
-	if len(args) < 2 {
-		return nil, errors.New("getTopPeers(treeId, n)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
-	n := args[1].Int()
+	n, err := getInt(args, 1, "n")
+	if err != nil {
+		return nil, err
+	}
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	stats := t.GetTopPeers(n)
 	jsStats := make([]any, len(stats))
@@ -306,13 +381,13 @@ func getTopPeers(_ js.Value, args []js.Value) (any, error) {
 
 func getAxisDistributions(_ js.Value, args []js.Value) (any, error) {
 	// getAxisDistributions(treeId, axisNames?: string[]) -> array of axis distribution stats
-	if len(args) < 1 {
-		return nil, errors.New("getAxisDistributions(treeId)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 
 	var axisNames []string
@@ -351,13 +426,13 @@ func getAxisDistributions(_ js.Value, args []js.Value) (any, error) {
 
 func resetAnalytics(_ js.Value, args []js.Value) (any, error) {
 	// resetAnalytics(treeId) -> resets all analytics
-	if len(args) < 1 {
-		return nil, errors.New("resetAnalytics(treeId)")
+	id, err := getInt(args, 0, "treeId")
+	if err != nil {
+		return nil, err
 	}
-	id := args[0].Int()
 	t, ok := treeRegistry[id]
 	if !ok {
-		return nil, fmt.Errorf("unknown treeId %d", id)
+		return nil, newErrf(ErrCodeNotFound, "unknown treeId %d", id)
 	}
 	t.ResetAnalytics()
 	return true, nil
@@ -366,9 +441,9 @@ func resetAnalytics(_ js.Value, args []js.Value) (any, error) {
 func computeDistributionStats(_ js.Value, args []js.Value) (any, error) {
 	// computeDistributionStats(distances: number[]) -> distribution stats
 	if len(args) < 1 {
-		return nil, errors.New("computeDistributionStats(distances)")
+		return nil, newErr(ErrCodeBadRequest, "computeDistributionStats(distances) requires 'distances' argument")
 	}
-	distances, err := getFloatSlice(args[0])
+	distances, err := getFloatSlice(args[0], "distances")
 	if err != nil {
 		return nil, err
 	}
@@ -394,7 +469,7 @@ func computeDistributionStats(_ js.Value, args []js.Value) (any, error) {
 func computePeerQualityScore(_ js.Value, args []js.Value) (any, error) {
 	// computePeerQualityScore(metrics: NATRoutingMetrics, weights?: QualityWeights) -> score
 	if len(args) < 1 {
-		return nil, errors.New("computePeerQualityScore(metrics)")
+		return nil, newErr(ErrCodeBadRequest, "computePeerQualityScore(metrics) requires 'metrics' argument")
 	}
 	m := args[0]
 	metrics := pd.NATRoutingMetrics{
@@ -432,7 +507,7 @@ func computePeerQualityScore(_ js.Value, args []js.Value) (any, error) {
 func computeTrustScore(_ js.Value, args []js.Value) (any, error) {
 	// computeTrustScore(metrics: TrustMetrics) -> score
 	if len(args) < 1 {
-		return nil, errors.New("computeTrustScore(metrics)")
+		return nil, newErr(ErrCodeBadRequest, "computeTrustScore(metrics) requires 'metrics' argument")
 	}
 	m := args[0]
 	metrics := pd.TrustMetrics{
@@ -482,9 +557,9 @@ func getDefaultPeerFeatureRanges(_ js.Value, _ []js.Value) (any, error) {
 func normalizePeerFeatures(_ js.Value, args []js.Value) (any, error) {
 	// normalizePeerFeatures(features: number[], ranges?: FeatureRanges) -> number[]
 	if len(args) < 1 {
-		return nil, errors.New("normalizePeerFeatures(features)")
+		return nil, newErr(ErrCodeBadRequest, "normalizePeerFeatures(features) requires 'features' argument")
 	}
-	features, err := getFloatSlice(args[0])
+	features, err := getFloatSlice(args[0], "features")
 	if err != nil {
 		return nil, err
 	}
@@ -512,13 +587,13 @@ func normalizePeerFeatures(_ js.Value, args []js.Value) (any, error) {
 func weightedPeerFeatures(_ js.Value, args []js.Value) (any, error) {
 	// weightedPeerFeatures(normalized: number[], weights: number[]) -> number[]
 	if len(args) < 2 {
-		return nil, errors.New("weightedPeerFeatures(normalized, weights)")
+		return nil, newErr(ErrCodeBadRequest, "weightedPeerFeatures(normalized, weights) requires 'normalized' and 'weights' arguments")
 	}
-	normalized, err := getFloatSlice(args[0])
+	normalized, err := getFloatSlice(args[0], "normalized")
 	if err != nil {
 		return nil, err
 	}
-	weights, err := getFloatSlice(args[1])
+	weights, err := getFloatSlice(args[1], "weights")
 	if err != nil {
 		return nil, err
 	}
@@ -534,7 +609,7 @@ func weightedPeerFeatures(_ js.Value, args []js.Value) (any, error) {
 func getExternalToolLinks(_ js.Value, args []js.Value) (any, error) {
 	// getExternalToolLinks(domain: string) -> ExternalToolLinks
 	if len(args) < 1 {
-		return nil, errors.New("getExternalToolLinks(domain)")
+		return nil, newErr(ErrCodeBadRequest, "getExternalToolLinks(domain) requires 'domain' argument")
 	}
 	domain := args[0].String()
 	links := pd.GetExternalToolLinks(domain)
@@ -544,7 +619,7 @@ func getExternalToolLinks(_ js.Value, args []js.Value) (any, error) {
 func getExternalToolLinksIP(_ js.Value, args []js.Value) (any, error) {
 	// getExternalToolLinksIP(ip: string) -> ExternalToolLinks
 	if len(args) < 1 {
-		return nil, errors.New("getExternalToolLinksIP(ip)")
+		return nil, newErr(ErrCodeBadRequest, "getExternalToolLinksIP(ip) requires 'ip' argument")
 	}
 	ip := args[0].String()
 	links := pd.GetExternalToolLinksIP(ip)
@@ -554,7 +629,7 @@ func getExternalToolLinksIP(_ js.Value, args []js.Value) (any, error) {
 func getExternalToolLinksEmail(_ js.Value, args []js.Value) (any, error) {
 	// getExternalToolLinksEmail(emailOrDomain: string) -> ExternalToolLinks
 	if len(args) < 1 {
-		return nil, errors.New("getExternalToolLinksEmail(emailOrDomain)")
+		return nil, newErr(ErrCodeBadRequest, "getExternalToolLinksEmail(emailOrDomain) requires 'emailOrDomain' argument")
 	}
 	emailOrDomain := args[0].String()
 	links := pd.GetExternalToolLinksEmail(emailOrDomain)
@@ -633,7 +708,7 @@ func getRDAPServers(_ js.Value, _ []js.Value) (any, error) {
 func buildRDAPDomainURL(_ js.Value, args []js.Value) (any, error) {
 	// buildRDAPDomainURL(domain: string) -> string
 	if len(args) < 1 {
-		return nil, errors.New("buildRDAPDomainURL(domain)")
+		return nil, newErr(ErrCodeBadRequest, "buildRDAPDomainURL(domain) requires 'domain' argument")
 	}
 	domain := args[0].String()
 	// Use universal RDAP redirector
@@ -643,7 +718,7 @@ func buildRDAPDomainURL(_ js.Value, args []js.Value) (any, error) {
 func buildRDAPIPURL(_ js.Value, args []js.Value) (any, error) {
 	// buildRDAPIPURL(ip: string) -> string
 	if len(args) < 1 {
-		return nil, errors.New("buildRDAPIPURL(ip)")
+		return nil, newErr(ErrCodeBadRequest, "buildRDAPIPURL(ip) requires 'ip' argument")
 	}
 	ip := args[0].String()
 	return fmt.Sprintf("https://rdap.org/ip/%s", ip), nil
@@ -652,7 +727,7 @@ func buildRDAPIPURL(_ js.Value, args []js.Value) (any, error) {
 func buildRDAPASNURL(_ js.Value, args []js.Value) (any, error) {
 	// buildRDAPASNURL(asn: string) -> string
 	if len(args) < 1 {
-		return nil, errors.New("buildRDAPASNURL(asn)")
+		return nil, newErr(ErrCodeBadRequest, "buildRDAPASNURL(asn) requires 'asn' argument")
 	}
 	asn := args[0].String()
 	// Normalize ASN

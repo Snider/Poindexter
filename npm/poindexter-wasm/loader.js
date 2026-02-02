@@ -6,6 +6,11 @@
 //   await tree.insert({ id: 'a', coords: [0,0], value: 'A' });
 //   const res = await tree.nearest([0.1, 0.2]);
 
+// --- Environment detection ---
+const isBrowser = typeof window !== 'undefined';
+const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+
+// --- Browser-specific helpers ---
 async function loadScriptOnce(src) {
   return new Promise((resolve, reject) => {
     // If already present, resolve immediately
@@ -18,19 +23,43 @@ async function loadScriptOnce(src) {
   });
 }
 
+// --- Loader logic ---
 async function ensureWasmExec(url) {
-  if (typeof window !== 'undefined' && typeof window.Go === 'function') return;
-  await loadScriptOnce(url);
-  if (typeof window === 'undefined' || typeof window.Go !== 'function') {
-    throw new Error('wasm_exec.js did not define window.Go');
+  if (typeof globalThis.Go === 'function') return;
+
+  if (isBrowser) {
+    await loadScriptOnce(url);
+  } else if (isNode) {
+    const { fileURLToPath } = await import('url');
+    const wasmExecPath = fileURLToPath(url);
+    await import(wasmExecPath);
+  } else {
+    throw new Error(`Unsupported environment: cannot load ${url}`);
+  }
+
+  if (typeof globalThis.Go !== 'function') {
+    throw new Error('wasm_exec.js did not define globalThis.Go');
   }
 }
 
 function unwrap(result) {
-  if (!result || typeof result !== 'object') throw new Error('bad result');
-  if (result.ok) return result.data;
-  throw new Error(result.error || 'unknown error');
+  if (!result || typeof result !== 'object') {
+    throw new Error(`bad/unexpected result type from WASM: ${typeof result}`);
+  }
+  if (result.ok) {
+    return result.data;
+  }
+  // Handle structured errors, which may be nested
+  const errorPayload = result.error || result;
+  if (errorPayload && typeof errorPayload === 'object') {
+    const err = new Error(errorPayload.message || 'unknown WASM error');
+    err.code = errorPayload.code;
+    throw err;
+  }
+  // Fallback for simple string errors
+  throw new Error(errorPayload || 'unknown WASM error');
 }
+
 
 function call(name, ...args) {
   const fn = globalThis[name];
@@ -65,18 +94,32 @@ export async function init(options = {}) {
   } = options;
 
   await ensureWasmExec(wasmExecURL);
-  const go = new window.Go();
+  const go = new globalThis.Go();
 
   let result;
   if (instantiateWasm) {
-    const source = await fetch(wasmURL).then(r => r.arrayBuffer());
+    let source;
+    if (isBrowser) {
+        source = await fetch(wasmURL).then(r => r.arrayBuffer());
+    } else {
+        const fs = await import('fs/promises');
+        const { fileURLToPath } = await import('url');
+        source = await fs.readFile(fileURLToPath(wasmURL));
+    }
     const inst = await instantiateWasm(source, go.importObject);
     result = { instance: inst };
-  } else if (WebAssembly.instantiateStreaming) {
+  } else if (isBrowser && WebAssembly.instantiateStreaming) {
     result = await WebAssembly.instantiateStreaming(fetch(wasmURL), go.importObject);
   } else {
-    const resp = await fetch(wasmURL);
-    const bytes = await resp.arrayBuffer();
+    let bytes;
+    if (isBrowser) {
+        const resp = await fetch(wasmURL);
+        bytes = await resp.arrayBuffer();
+    } else {
+        const fs = await import('fs/promises');
+        const { fileURLToPath } = await import('url');
+        bytes = await fs.readFile(fileURLToPath(wasmURL));
+    }
     result = await WebAssembly.instantiate(bytes, go.importObject);
   }
 
