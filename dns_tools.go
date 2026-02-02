@@ -663,7 +663,7 @@ func RDAPLookupDomainWithTimeout(domain string, timeout time.Duration) RDAPRespo
 		result.LookupTimeMs = time.Since(start).Milliseconds()
 		return result
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -718,7 +718,7 @@ func RDAPLookupIPWithTimeout(ip string, timeout time.Duration) RDAPResponse {
 		result.LookupTimeMs = time.Since(start).Milliseconds()
 		return result
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -769,7 +769,7 @@ func RDAPLookupASNWithTimeout(asn string, timeout time.Duration) RDAPResponse {
 		result.LookupTimeMs = time.Since(start).Milliseconds()
 		return result
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
