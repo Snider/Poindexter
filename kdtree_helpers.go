@@ -18,12 +18,6 @@ var (
 	ErrStatsDimMismatch = errors.New("kdtree: stats dimensionality mismatch")
 )
 
-// AxisStats holds the min/max observed for a single axis.
-type AxisStats struct {
-	Min float64
-	Max float64
-}
-
 // NormStats holds per-axis normalisation statistics.
 // For D dimensions, Stats has length D.
 type NormStats struct {
