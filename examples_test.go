@@ -3,7 +3,7 @@ package poindexter_test
 import (
 	"fmt"
 
-	poindexter "github.com/Snider/Poindexter"
+	poindexter "forge.lthn.ai/Snider/Poindexter"
 )
 
 func ExampleNewKDTree() {

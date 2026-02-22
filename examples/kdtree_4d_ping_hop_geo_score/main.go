@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	poindexter "github.com/Snider/Poindexter"
+	poindexter "forge.lthn.ai/Snider/Poindexter"
 )
 
 type Peer4 struct {
