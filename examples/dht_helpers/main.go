@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	po "forge.lthn.ai/Snider/Poindexter"
+	po "github.com/Snider/Poindexter"
 )
 
 // BuildPingHop2D wraps poindexter.Build2D to construct 2D points from (ping_ms, hop_count).

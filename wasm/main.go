@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"syscall/js"
 
-	pd "forge.lthn.ai/Snider/Poindexter"
+	pd "github.com/Snider/Poindexter"
 )
 
 // Simple registry for KDTree instances created from JS.

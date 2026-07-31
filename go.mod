@@ -1,3 +1,3 @@
-module forge.lthn.ai/Snider/Poindexter
+module github.com/Snider/Poindexter
 
 go 1.23
