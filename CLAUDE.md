@@ -10,6 +10,8 @@ Poindexter is a Go library providing:
 - **Helper functions** for building normalized/weighted KD points (2D/3D/4D/ND)
 - **DNS/RDAP tools** for domain, IP, and ASN lookups
 - **Analytics** for tree operations and peer selection tracking
+- **State index sidecar** (`stateindex/`) mapping index URIs to byte ranges inside
+  State `.kv` container files
 
 ## Build Commands
 
@@ -94,6 +96,15 @@ make tidy
 - Type-specific sorts: `SortInts()`, `SortStrings()`, `SortFloat64s()`
 - Generic sorts: `SortBy()`, `SortByKey()`
 - Binary search: `BinarySearch()`, `BinarySearchStrings()`
+
+**stateindex/** - Sidecar index over State `.kv` containers:
+- `Index` / `Entry` — a JSON document listing segments, each naming a container
+  file plus the payload's offset and length inside it
+- `Append()`/`Set()`/`Lookup()`/`Remove()` keyed on `index_uri`; `ByPath()`/`Paths()`
+  for the one-file and many-file cases
+- Nothing here opens a container. Ranges are recorded at write time and taken at
+  their word, so resolving an index URI never touches the binary State payload —
+  entries may name files that do not exist
 
 **dns_tools.go** - DNS and RDAP lookup utilities:
 - DNS record types and lookup functions
