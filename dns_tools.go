@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -259,6 +260,14 @@ func DNSLookup(domain string, recordType DNSRecordType) DNSLookupResult {
 	return DNSLookupWithTimeout(domain, recordType, 10*time.Second)
 }
 
+// isValidDomain validates the domain name against a simple regex to prevent injection
+func isValidDomain(domain string) bool {
+	// A simple regex to match valid domain name characters.
+	// This is not a full validation, but it prevents common injection attacks.
+	match, _ := regexp.MatchString(`^([a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*[\._]?$`, domain)
+	return match
+}
+
 // DNSLookupWithTimeout performs a DNS lookup with a custom timeout
 func DNSLookupWithTimeout(domain string, recordType DNSRecordType, timeout time.Duration) DNSLookupResult {
 	start := time.Now()
@@ -266,6 +275,12 @@ func DNSLookupWithTimeout(domain string, recordType DNSRecordType, timeout time.
 		Domain:    domain,
 		QueryType: string(recordType),
 		Timestamp: start,
+	}
+
+	if !isValidDomain(domain) {
+		result.Error = "invalid domain format"
+		result.LookupTimeMs = time.Since(start).Milliseconds()
+		return result
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -651,9 +666,9 @@ func RDAPLookupDomainWithTimeout(domain string, timeout time.Duration) RDAPRespo
 	serverURL, ok := rdapServers[tld]
 	if !ok {
 		// Try to use IANA bootstrap
-		serverURL = fmt.Sprintf("https://rdap.org/domain/%s", domain)
+		serverURL = fmt.Sprintf("https://rdap.org/domain/%s", url.PathEscape(domain))
 	} else {
-		serverURL = serverURL + "domain/" + domain
+		serverURL = serverURL + "domain/" + url.PathEscape(domain)
 	}
 
 	client := &http.Client{Timeout: timeout}
@@ -663,7 +678,7 @@ func RDAPLookupDomainWithTimeout(domain string, timeout time.Duration) RDAPRespo
 		result.LookupTimeMs = time.Since(start).Milliseconds()
 		return result
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -709,7 +724,7 @@ func RDAPLookupIPWithTimeout(ip string, timeout time.Duration) RDAPResponse {
 	}
 
 	// Use rdap.org as a universal redirector
-	serverURL := fmt.Sprintf("https://rdap.org/ip/%s", ip)
+	serverURL := fmt.Sprintf("https://rdap.org/ip/%s", url.PathEscape(ip))
 
 	client := &http.Client{Timeout: timeout}
 	resp, err := client.Get(serverURL)
@@ -718,7 +733,7 @@ func RDAPLookupIPWithTimeout(ip string, timeout time.Duration) RDAPResponse {
 		result.LookupTimeMs = time.Since(start).Milliseconds()
 		return result
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -760,7 +775,7 @@ func RDAPLookupASNWithTimeout(asn string, timeout time.Duration) RDAPResponse {
 	asnNum := strings.TrimPrefix(strings.ToUpper(asn), "AS")
 
 	// Use rdap.org as a universal redirector
-	serverURL := fmt.Sprintf("https://rdap.org/autnum/%s", asnNum)
+	serverURL := fmt.Sprintf("https://rdap.org/autnum/%s", url.PathEscape(asnNum))
 
 	client := &http.Client{Timeout: timeout}
 	resp, err := client.Get(serverURL)
@@ -769,7 +784,7 @@ func RDAPLookupASNWithTimeout(asn string, timeout time.Duration) RDAPResponse {
 		result.LookupTimeMs = time.Since(start).Milliseconds()
 		return result
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

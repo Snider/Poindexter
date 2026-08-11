@@ -1,0 +1,42 @@
+goos: linux
+goarch: amd64
+pkg: github.com/Snider/Poindexter
+cpu: Intel(R) Xeon(R) Processor @ 2.30GHz
+BenchmarkNearest_Linear_Uniform_100k_2D-4      	    1384	    850417 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Uniform_100k_2D-4       	  825416	      1422 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Uniform_100k_4D-4      	    1111	   1108445 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Uniform_100k_4D-4       	  159350	     16747 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Clustered_100k_2D-4    	    1156	    897493 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Clustered_100k_2D-4     	  164542	      7957 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Clustered_100k_4D-4    	    1093	   1068889 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Clustered_100k_4D-4     	     679	   1839479 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Uniform_1k_2D-4        	  140626	      8470 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Uniform_1k_2D-4         	 1417580	       721.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Uniform_10k_2D-4       	   14460	     83143 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Uniform_10k_2D-4        	 1372161	       864.0 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Uniform_1k_4D-4        	  112540	     11183 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Uniform_1k_4D-4         	  352273	      3433 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Uniform_10k_4D-4       	   10000	    106582 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Uniform_10k_4D-4        	  183109	      6641 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Clustered_1k_2D-4      	  140745	     11324 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Clustered_1k_2D-4       	  593008	      2362 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Linear_Clustered_10k_2D-4     	   14334	    101665 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_Gonum_Clustered_10k_2D-4      	  258667	      4285 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKNN10_Linear_Uniform_10k_2D-4         	     393	   2625727 ns/op	  164496 B/op	       6 allocs/op
+BenchmarkKNN10_Gonum_Uniform_10k_2D-4          	  172296	      6853 ns/op	    1384 B/op	      12 allocs/op
+BenchmarkKNN10_Linear_Clustered_10k_2D-4       	     454	   2595619 ns/op	  164496 B/op	       6 allocs/op
+BenchmarkKNN10_Gonum_Clustered_10k_2D-4        	   97267	     11278 ns/op	    1384 B/op	      12 allocs/op
+BenchmarkRadiusMid_Linear_Uniform_10k_2D-4     	     236	   4931056 ns/op	  959204 B/op	     123 allocs/op
+BenchmarkRadiusMid_Gonum_Uniform_10k_2D-4      	     223	   5436124 ns/op	 1025664 B/op	     129 allocs/op
+BenchmarkRadiusMid_Linear_Clustered_10k_2D-4   	     199	   5687141 ns/op	 1232172 B/op	     165 allocs/op
+BenchmarkRadiusMid_Gonum_Clustered_10k_2D-4    	     182	   6186214 ns/op	 1315417 B/op	     179 allocs/op
+BenchmarkNearest_1k_2D-4                       	 1000000	      1070 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_10k_2D-4                      	 1908055	      1276 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_1k_4D-4                       	  249206	      4226 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNearest_10k_4D-4                      	  185893	      5574 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKNearest10_1k_2D-4                    	  192446	      5614 ns/op	    1384 B/op	      12 allocs/op
+BenchmarkKNearest10_10k_2D-4                   	  171120	     10207 ns/op	    1384 B/op	      12 allocs/op
+BenchmarkRadiusMid_1k_2D-4                     	    2348	    526415 ns/op	   84118 B/op	      18 allocs/op
+BenchmarkRadiusMid_10k_2D-4                    	     122	  10288116 ns/op	 1036096 B/op	     218 allocs/op
+PASS
+ok  	github.com/Snider/Poindexter	70.252s

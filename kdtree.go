@@ -564,8 +564,8 @@ func (t *KDTree[T]) GetTopPeers(n int) []PeerStats {
 	return t.peerAnalytics.GetTopPeers(n)
 }
 
-// ComputeDistanceDistribution analyzes the distribution of current point coordinates.
-func (t *KDTree[T]) ComputeDistanceDistribution(axisNames []string) []AxisDistribution {
+// ComputeAxisDistributions analyzes the distribution of current point coordinates.
+func (t *KDTree[T]) ComputeAxisDistributions(axisNames []string) []AxisDistribution {
 	return ComputeAxisDistributions(t.points, axisNames)
 }
 
