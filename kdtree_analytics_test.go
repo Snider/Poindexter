@@ -618,7 +618,7 @@ func TestKDTreeDistanceDistribution(t *testing.T) {
 	}
 	tree, _ := NewKDTree(points)
 
-	dists := tree.ComputeDistanceDistribution([]string{"x", "y"})
+	dists := tree.ComputeAxisDistributions([]string{"x", "y"})
 	if len(dists) != 2 {
 		t.Errorf("expected 2 axis distributions, got %d", len(dists))
 	}
