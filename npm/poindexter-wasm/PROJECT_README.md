@@ -71,7 +71,9 @@ Explore runnable examples in the repository:
 - examples/kdtree_2d_ping_hop
 - examples/kdtree_3d_ping_hop_geo
 - examples/kdtree_4d_ping_hop_geo_score
+- examples/dht_helpers (convenience wrappers for common DHT schemas)
 - examples/wasm-browser (browser demo using the ESM loader)
+- examples/wasm-browser-ts (TypeScript + Vite local demo)
 
 ### KDTree performance and notes
 - Dual backend support: Linear (always available) and an optimized KD backend enabled when building with `-tags=gonum`. Linear is the default; with the `gonum` tag, the optimized backend becomes the default.
@@ -217,3 +219,20 @@ This project is licensed under the European Union Public Licence v1.2 (EUPL-1.2)
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+
+## Coverage
+
+- CI produces coverage summaries as artifacts on every push/PR:
+  - Default job: `coverage-summary.md` (from `coverage.out`)
+  - Gonum-tag job: `coverage-summary-gonum.md` (from `coverage-gonum.out`)
+- Locally, you can generate and inspect coverage with the Makefile:
+
+```bash
+make cover         # runs tests with race + coverage and prints the total
+make coverfunc     # prints per-function coverage
+make cover-kdtree  # filters coverage to kdtree.go
+make coverhtml     # writes coverage.html for visual inspection
+```
+
+Note: CI also uploads raw coverage profiles as artifacts (`coverage.out`, `coverage-gonum.out`).
